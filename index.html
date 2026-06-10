@@ -77,6 +77,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 14px;
+      flex-wrap: wrap;
     }
 
     .class-title {
@@ -105,6 +106,36 @@
       font-size: 12px;
       line-height: 1;
       white-space: nowrap;
+    }
+
+    .week-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .week-select,
+    .week-step {
+      height: 34px;
+      border: 1px solid #303b42;
+      border-radius: var(--radius);
+      background: #151b1f;
+      color: var(--text);
+    }
+
+    .week-select {
+      min-width: 190px;
+      padding: 0 10px;
+    }
+
+    .week-step {
+      width: 36px;
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1;
     }
 
     .days-head {
@@ -515,6 +546,53 @@
       display: none;
     }
 
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgb(0 0 0 / 0.72);
+    }
+
+    .modal-backdrop[hidden] {
+      display: none;
+    }
+
+    .intro-modal {
+      width: min(560px, 100%);
+      max-height: min(760px, 92dvh);
+      overflow: auto;
+      border: 1px solid #334047;
+      border-radius: 12px;
+      background: #15191d;
+      box-shadow: 0 24px 70px rgb(0 0 0 / 0.58);
+      padding: 22px;
+    }
+
+    .intro-modal h2 {
+      margin: 0 0 12px;
+      font-size: 24px;
+      line-height: 1.15;
+    }
+
+    .intro-modal p,
+    .intro-modal li {
+      color: #cbd5da;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .intro-modal ol {
+      margin: 14px 0 18px;
+      padding-left: 22px;
+    }
+
+    .intro-modal li + li {
+      margin-top: 8px;
+    }
+
     @media (max-width: 1280px) {
       .main {
         grid-template-columns: 1fr;
@@ -539,6 +617,17 @@
 
       .title-row {
         align-items: flex-start;
+      }
+
+      .week-controls {
+        width: 100%;
+        margin-left: 0;
+        order: 3;
+      }
+
+      .week-select {
+        min-width: 0;
+        flex: 1;
       }
 
       .class-name {
@@ -654,6 +743,11 @@
         <div class="class-title">
           <span class="class-name">GMG10C</span>
         </div>
+        <div class="week-controls" aria-label="Woche auswählen">
+          <button class="week-step" id="prevWeekBtn" type="button" aria-label="Vorherige Woche">‹</button>
+          <select class="week-select" id="weekSelect" aria-label="Woche auswählen"></select>
+          <button class="week-step" id="nextWeekBtn" type="button" aria-label="Nächste Woche">›</button>
+        </div>
         <div class="sync-status" id="syncStatus">Lokal</div>
       </div>
 
@@ -709,13 +803,29 @@
 
   </div>
 
+  <div class="modal-backdrop" id="introModal" hidden>
+    <section class="intro-modal" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+      <h2 id="introTitle">So funktioniert BEPO</h2>
+      <p>BEPO sammelt eure Notizen zur Berufsschulwoche direkt im Stundenplan.</p>
+      <ol>
+        <li>Wähle oben die passende Woche aus.</li>
+        <li>Tippe eine Stunde oder Doppelstunde im Plan an.</li>
+        <li>Schreibe deine Notiz und markiere die Stunde als fertig.</li>
+        <li>Grüne Stunden sind erledigt und werden beim Export berücksichtigt.</li>
+        <li>Im Export kannst du den Text pro Tag kopieren oder als PDF speichern.</li>
+      </ol>
+      <p>Wenn die App online ist, werden Änderungen automatisch mit den anderen synchronisiert.</p>
+      <button class="btn primary" id="introCloseBtn" type="button">Loslegen</button>
+    </section>
+  </div>
+
   <section class="print-area" id="printArea" aria-hidden="true"></section>
 
   <script>
     const STORAGE_KEY = "gmg10c_stundenplan_notizen_v1";
+    const INTRO_KEY = "gmg10c_bepo_intro_seen_v1";
     const PLAN_ID = "gmg10c";
     const FIREBASE_SDK_VERSION = "10.12.5";
-    const DEFAULT_DATA = { notes: {} };
 
     const firebaseConfig = {
       apiKey: "AIzaSyDWYcL4LhkKw-7NwnByjyHDrBJyuJx_3Ls",
@@ -783,13 +893,17 @@
 
     const savedData = loadData();
     const state = {
-      notes: savedData.notes,
+      weeks: savedData.weeks,
+      selectedWeek: savedData.selectedWeek,
       selectedLessonId: null,
       scheduleDay: "mo",
       exportDay: "mo"
     };
 
     const scheduleShell = document.querySelector(".schedule-shell");
+    const weekSelect = document.querySelector("#weekSelect");
+    const prevWeekBtn = document.querySelector("#prevWeekBtn");
+    const nextWeekBtn = document.querySelector("#nextWeekBtn");
     const scheduleDays = document.querySelector("#scheduleDays");
     const timeAxis = document.querySelector("#timeAxis");
     const gridArea = document.querySelector("#gridArea");
@@ -806,6 +920,8 @@
     const copyToast = document.querySelector("#copyToast");
     const syncStatus = document.querySelector("#syncStatus");
     const printArea = document.querySelector("#printArea");
+    const introModal = document.querySelector("#introModal");
+    const introCloseBtn = document.querySelector("#introCloseBtn");
 
     let remotePlanRef = null;
     let setRemoteDoc = null;
@@ -814,23 +930,34 @@
     let applyingRemoteData = false;
 
     function loadData() {
+      const currentWeek = getCurrentWeekKey();
       try {
         const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        if (!data) return { ...DEFAULT_DATA };
-        if (data.notes) {
+        if (!data) {
+          return { weeks: createEmptyWeeks(currentWeek), selectedWeek: currentWeek };
+        }
+        if (data.weeks) {
           return {
-            notes: data.notes || {}
+            weeks: normalizeWeeks(data.weeks),
+            selectedWeek: data.selectedWeek || currentWeek
           };
         }
-        return { notes: data };
+        if (data.notes) {
+          return {
+            weeks: createEmptyWeeks(currentWeek, data.notes),
+            selectedWeek: data.selectedWeek || currentWeek
+          };
+        }
+        return { weeks: createEmptyWeeks(currentWeek, data), selectedWeek: currentWeek };
       } catch {
-        return { ...DEFAULT_DATA };
+        return { weeks: createEmptyWeeks(currentWeek), selectedWeek: currentWeek };
       }
     }
 
     function saveData() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        notes: state.notes
+        weeks: state.weeks,
+        selectedWeek: state.selectedWeek
       }));
       if (!applyingRemoteData) queueRemoteSave();
     }
@@ -839,18 +966,132 @@
       syncStatus.textContent = text;
     }
 
-    function hasAnyNotes(notes) {
-      return Object.values(notes).some((entry) => entry && (entry.text || entry.done));
+    function getWeekStartDate(date = new Date()) {
+      const value = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const day = value.getDay() || 7;
+      value.setDate(value.getDate() - day + 1);
+      return value;
     }
 
-    function applyRemoteNotes(notes) {
+    function addDays(date, amount) {
+      const value = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      value.setDate(value.getDate() + amount);
+      return value;
+    }
+
+    function toIsoDateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function parseWeekKey(weekKey) {
+      const [year, month, day] = String(weekKey).split("-").map(Number);
+      if (!year || !month || !day) return getWeekStartDate();
+      return new Date(year, month - 1, day);
+    }
+
+    function getCurrentWeekKey() {
+      return toIsoDateKey(getWeekStartDate());
+    }
+
+    function formatShortDate(date) {
+      return `${String(date.getDate()).padStart(2, "0")}.${String(date.getMonth() + 1).padStart(2, "0")}.`;
+    }
+
+    function formatWeekLabel(weekKey) {
+      const start = parseWeekKey(weekKey);
+      const end = addDays(start, 4);
+      const suffix = weekKey === getCurrentWeekKey() ? "Diese Woche - " : "";
+      return `${suffix}${formatShortDate(start)} - ${formatShortDate(end)}`;
+    }
+
+    function getSelectableWeekKeys() {
+      const keys = new Set(Object.keys(state.weeks || {}));
+      const currentStart = parseWeekKey(state.selectedWeek || getCurrentWeekKey());
+      for (let offset = -8; offset <= 12; offset += 1) {
+        keys.add(toIsoDateKey(addDays(currentStart, offset * 7)));
+      }
+      keys.add(state.selectedWeek);
+      keys.add(getCurrentWeekKey());
+      return Array.from(keys).filter(Boolean).sort();
+    }
+
+    function normalizeWeeks(weeks) {
+      return Object.fromEntries(Object.entries(weeks || {}).map(([key, value]) => [
+        key,
+        { notes: value && value.notes ? value.notes : {} }
+      ]));
+    }
+
+    function createEmptyWeeks(weekKey, notes = {}) {
+      return { [weekKey]: { notes: notes || {} } };
+    }
+
+    function getWeekData(weekKey = state.selectedWeek) {
+      if (!state.weeks[weekKey]) {
+        state.weeks[weekKey] = { notes: {} };
+      }
+      return state.weeks[weekKey];
+    }
+
+    function getCurrentNotes() {
+      return getWeekData().notes;
+    }
+
+    function ensureWeek(weekKey) {
+      if (!state.weeks[weekKey]) {
+        state.weeks[weekKey] = { notes: {} };
+      }
+    }
+
+    function hasAnyWeekNotes(weeks) {
+      return Object.values(weeks || {}).some((week) => (
+        Object.values((week && week.notes) || {}).some((entry) => entry && (entry.text || entry.done))
+      ));
+    }
+
+    function applyRemoteWeeks(weeks) {
       applyingRemoteData = true;
-      state.notes = notes || {};
+      state.weeks = normalizeWeeks(weeks);
+      if (!state.weeks[state.selectedWeek]) {
+        state.weeks[state.selectedWeek] = { notes: {} };
+      }
       saveData();
       applyingRemoteData = false;
+      renderWeekSelect();
       renderGrid();
       renderEditor();
       renderExport();
+    }
+
+    function renderWeekSelect() {
+      weekSelect.innerHTML = "";
+      getSelectableWeekKeys().forEach((weekKey) => {
+        const option = document.createElement("option");
+        option.value = weekKey;
+        option.textContent = formatWeekLabel(weekKey);
+        option.selected = weekKey === state.selectedWeek;
+        weekSelect.append(option);
+      });
+    }
+
+    function selectWeek(weekKey) {
+      ensureWeek(weekKey);
+      state.selectedWeek = weekKey;
+      copyToast.textContent = "";
+      saveData();
+      renderWeekSelect();
+      renderGrid();
+      renderEditor();
+      renderExport();
+    }
+
+    function shiftWeek(direction) {
+      const start = parseWeekKey(state.selectedWeek);
+      const nextWeek = toIsoDateKey(addDays(start, direction * 7));
+      selectWeek(nextWeek);
     }
 
     function queueRemoteSave() {
@@ -860,7 +1101,7 @@
       remoteSaveTimer = window.setTimeout(async () => {
         try {
           await setRemoteDoc(remotePlanRef, {
-            notes: state.notes,
+            weeks: state.weeks,
             updatedAt: remoteServerTimestamp()
           }, { merge: true });
           setSyncStatus("Online gespeichert");
@@ -886,11 +1127,11 @@
         firestoreModule.onSnapshot(remotePlanRef, (snapshot) => {
           if (snapshot.exists()) {
             const data = snapshot.data();
-            applyRemoteNotes(data.notes || {});
+            applyRemoteWeeks(data.weeks || createEmptyWeeks(state.selectedWeek, data.notes || {}));
             setSyncStatus("Online synchron");
           } else {
             setSyncStatus("Online bereit");
-            if (hasAnyNotes(state.notes)) queueRemoteSave();
+            if (hasAnyWeekNotes(state.weeks)) queueRemoteSave();
           }
         }, (error) => {
           console.error(error);
@@ -976,17 +1217,18 @@
     }
 
     function getEntry(id) {
-      return state.notes[id] || { text: "", done: false };
+      return getCurrentNotes()[id] || { text: "", done: false };
     }
 
     function setEntry(id, entry) {
-      state.notes[id] = {
+      const notes = getCurrentNotes();
+      notes[id] = {
         text: entry.text.trim(),
         done: Boolean(entry.done)
       };
 
-      if (!state.notes[id].text && !state.notes[id].done) {
-        delete state.notes[id];
+      if (!notes[id].text && !notes[id].done) {
+        delete notes[id];
       }
 
       saveData();
@@ -1222,6 +1464,30 @@
       }
     }
 
+    function showIntroIfNeeded() {
+      if (localStorage.getItem(INTRO_KEY)) return;
+      introModal.hidden = false;
+      introCloseBtn.focus();
+    }
+
+    function closeIntro() {
+      localStorage.setItem(INTRO_KEY, "true");
+      introModal.hidden = true;
+    }
+
+    weekSelect.addEventListener("change", () => selectWeek(weekSelect.value));
+    prevWeekBtn.addEventListener("click", () => shiftWeek(-1));
+    nextWeekBtn.addEventListener("click", () => shiftWeek(1));
+
+    introCloseBtn.addEventListener("click", closeIntro);
+    introModal.addEventListener("click", (event) => {
+      if (event.target === introModal) closeIntro();
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !introModal.hidden) closeIntro();
+    });
+
     copyDayBtn.addEventListener("click", async () => {
       const text = exportForDay(state.exportDay);
       const ok = await copyText(text);
@@ -1260,9 +1526,11 @@
 
     renderScheduleDays();
     renderTimeAxis();
+    renderWeekSelect();
     renderGrid();
     renderTabs();
     renderExport();
+    showIntroIfNeeded();
     setupFirebaseSync();
     updateNowLine();
     window.setInterval(updateNowLine, 60000);
