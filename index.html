@@ -1,0 +1,1300 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GMG10C Notizen-Stundenplan</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0c0d0f;
+      --panel: #151719;
+      --panel-2: #1f2529;
+      --card: #c2ccd2;
+      --card-alt: #c2ccd2;
+      --card-warn: #c2ccd2;
+      --line: #39444a;
+      --text: #ecf2f5;
+      --muted: #a8b1b8;
+      --soft: #c6d0d6;
+      --accent: #ff7658;
+      --green: #38d6a3;
+      --green-dark: #123f35;
+      --orange: #f7a51f;
+      --teal: #04a98e;
+      --violet: #7b62e7;
+      --shadow: 0 14px 34px rgb(0 0 0 / 0.28);
+      --radius: 8px;
+      --hour-h: calc((100dvh - 94px) / 12);
+      --day-w: 144px;
+      --time-w: 82px;
+      --day-count: 5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    button,
+    textarea,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      height: 100dvh;
+      min-height: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      background: #0d0e10;
+    }
+
+    .topbar {
+      z-index: 20;
+      background: #050607;
+      border-bottom: 1px solid #15191c;
+      padding: 10px clamp(10px, 2vw, 20px) 8px;
+    }
+
+    .title-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .class-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #9ca9b4;
+      min-width: 0;
+    }
+
+    .person-icon,
+    .info-icon,
+    .dots-icon {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      color: #77838d;
+    }
+
+    .person-icon::before {
+      content: "♙";
+      font-size: 36px;
+      transform: rotate(180deg);
+      line-height: 1;
+    }
+
+    .class-name {
+      font-size: clamp(20px, 4vw, 28px);
+      font-weight: 450;
+      letter-spacing: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chevron {
+      width: 20px;
+      height: 20px;
+      border-right: 4px solid #9ca9b4;
+      border-bottom: 4px solid #9ca9b4;
+      transform: rotate(45deg) translateY(-6px);
+      flex: 0 0 auto;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .info-icon {
+      border: 3px solid #66737e;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 26px;
+    }
+
+    .dots-icon {
+      font-size: 38px;
+      line-height: 1;
+      transform: rotate(90deg);
+    }
+
+    .days-head {
+      display: grid;
+      grid-template-columns: var(--time-w) repeat(5, minmax(0, 1fr));
+      align-items: center;
+      overflow: hidden;
+      color: #8d98a3;
+      max-width: calc(var(--time-w) + var(--day-w) * 5);
+    }
+
+    .days-spacer {
+      min-height: 1px;
+    }
+
+    .day-name {
+      border-radius: 7px;
+      background: transparent;
+      color: inherit;
+      text-align: center;
+      padding: 4px 0 8px;
+      line-height: 1;
+    }
+
+    button.day-name {
+      width: 100%;
+      min-height: 32px;
+    }
+
+    .day-name span {
+      display: block;
+      font-size: 22px;
+      font-weight: 500;
+    }
+
+    .day-name.today {
+      color: #8d98a3;
+    }
+
+    .day-name.is-selected {
+      color: #061f18;
+      background: var(--green);
+      font-weight: 650;
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 350px;
+      gap: 18px;
+      min-height: 0;
+      height: 100%;
+      padding: 0 clamp(8px, 2vw, 20px) 10px;
+      min-width: 0;
+    }
+
+    .schedule-shell {
+      min-width: 0;
+      min-height: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #151515;
+      border-top: 1px solid #111;
+      box-shadow: inset 0 1px #1b1e20;
+    }
+
+    .schedule {
+      width: calc(var(--time-w) + var(--day-w) * var(--day-count));
+      height: calc(var(--hour-h) * 12);
+      min-height: 0;
+      display: grid;
+      grid-template-columns: var(--time-w) repeat(var(--day-count), var(--day-w));
+      position: relative;
+    }
+
+    .time-axis {
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      grid-column: 1;
+      background: #151515;
+      border-right: 1px solid #1d2225;
+    }
+
+    .hour-slot {
+      height: var(--hour-h);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 10px 0 8px;
+      color: #b6c0c8;
+      position: relative;
+    }
+
+    .hour-slot.break-before::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: -1px;
+      height: 1px;
+      background: #516169;
+    }
+
+    .hour-time {
+      display: block;
+      font-size: 22px;
+      line-height: 1;
+      margin-bottom: 17px;
+      text-align: right;
+      padding-right: 8px;
+    }
+
+    .hour-num {
+      display: block;
+      font-size: 27px;
+      line-height: 1;
+      text-align: center;
+    }
+
+    .grid-area {
+      grid-column: 2 / -1;
+      display: grid;
+      grid-template-columns: repeat(var(--day-count), var(--day-w));
+      grid-template-rows: repeat(12, var(--hour-h));
+      position: relative;
+    }
+
+    .grid-line {
+      border-bottom: 1px solid var(--line);
+      min-height: 0;
+    }
+
+    .grid-line.break-before {
+      border-top: 1px solid #516169;
+    }
+
+    .lesson {
+      position: absolute;
+      left: calc(var(--col) * var(--day-w) + 4px);
+      top: calc((var(--start) - 1) * var(--hour-h) + 7px);
+      width: calc(var(--day-w) - 8px);
+      height: calc((var(--span) * var(--hour-h)) - 10px);
+      border-radius: var(--radius);
+      background: var(--card);
+      color: #182228;
+      box-shadow: 0 0 0 1px rgb(255 255 255 / 0.04), 0 5px 12px rgb(0 0 0 / 0.18);
+      padding: 11px 10px 8px 18px;
+      text-align: left;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease, border-color 160ms ease;
+      outline: 0;
+    }
+
+    .lesson::before {
+      content: "";
+      position: absolute;
+      top: 10px;
+      bottom: 10px;
+      left: 7px;
+      width: 5px;
+      border-radius: 999px;
+      background: #7d8d96;
+      opacity: 0.9;
+    }
+
+    .lesson[data-tone~="light"],
+    .lesson[data-tone~="warn"],
+    .lesson[data-tone~="teal"],
+    .lesson[data-tone~="orange"] {
+      background: var(--card);
+      box-shadow: 0 0 0 1px rgb(255 255 255 / 0.04), 0 5px 12px rgb(0 0 0 / 0.18);
+    }
+
+    .lesson[data-tone~="violet"]::before {
+      background: #7d8d96;
+    }
+
+    .lesson:hover,
+    .lesson:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 0 0 2px rgb(56 214 163 / 0.45), 0 12px 28px rgb(0 0 0 / 0.32);
+    }
+
+    .lesson.is-active {
+      box-shadow: 0 0 0 2px #eef4f6, 0 10px 24px rgb(0 0 0 / 0.28);
+    }
+
+    .lesson.is-done {
+      background: linear-gradient(145deg, #175d4d, #24453f);
+      box-shadow: inset 0 0 0 3px var(--green), 0 10px 28px rgb(0 0 0 / 0.28);
+      color: #ecfff9;
+    }
+
+    .lesson.is-done::after {
+      content: "✓";
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      width: 25px;
+      height: 25px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--green);
+      color: #06241c;
+      font-weight: 800;
+      font-size: 17px;
+    }
+
+    .lesson-subject {
+      font-size: 21px;
+      line-height: 1.02;
+      font-weight: 650;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
+    .lesson-teacher,
+    .lesson-room {
+      font-size: 20px;
+      line-height: 1.12;
+      color: currentColor;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
+    .lesson-note-dot {
+      margin-top: auto;
+      min-height: 24px;
+      color: currentColor;
+      font-size: 13px;
+      font-weight: 650;
+      letter-spacing: 0;
+      opacity: 0.95;
+      display: none;
+    }
+
+    .lesson.has-text .lesson-note-dot {
+      display: block;
+    }
+
+    .side {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 14px;
+    }
+
+    .panel {
+      min-height: 0;
+      background: #151719;
+      border: 1px solid #293136;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid #283036;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.15;
+      font-weight: 650;
+    }
+
+    .panel-subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .editor-body {
+      min-height: 0;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.45;
+      padding: 4px 0;
+    }
+
+    .field-label {
+      color: var(--soft);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    textarea,
+    .text-input {
+      width: 100%;
+      resize: vertical;
+      border: 1px solid #354149;
+      border-radius: 8px;
+      background: #0f1113;
+      color: var(--text);
+      padding: 12px;
+      line-height: 1.45;
+      outline: 0;
+    }
+
+    textarea {
+      min-height: 74px;
+    }
+
+    .text-input {
+      min-height: 42px;
+      resize: none;
+    }
+
+    textarea:focus,
+    .text-input:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgb(56 214 163 / 0.14);
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #d7e1e6;
+      line-height: 1.35;
+      font-size: 14px;
+    }
+
+    .check-row input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--green);
+      flex: 0 0 auto;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .btn {
+      min-height: 36px;
+      border-radius: 8px;
+      padding: 0 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #eef6f8;
+      background: #2b343a;
+      font-weight: 650;
+    }
+
+    .btn.primary {
+      color: #06241c;
+      background: var(--green);
+    }
+
+    .btn.ghost {
+      background: transparent;
+      border: 1px solid #39454c;
+      color: #dbe5ea;
+    }
+
+    .btn:focus-visible {
+      outline: 3px solid rgb(56 214 163 / 0.45);
+      outline-offset: 2px;
+    }
+
+    .toast {
+      min-height: 22px;
+      color: var(--green);
+      font-size: 14px;
+      line-height: 1.3;
+    }
+
+    .export-body {
+      min-height: 0;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      grid-template-rows: auto minmax(0, 1fr) auto auto auto;
+      overflow: hidden;
+    }
+
+    .day-tabs {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .tab {
+      height: 38px;
+      border-radius: 8px;
+      background: #242b30;
+      color: #cdd7dd;
+      font-weight: 650;
+    }
+
+    .tab.is-selected {
+      background: var(--accent);
+      color: #1e0d08;
+    }
+
+    .export-box {
+      min-height: 74px;
+      white-space: pre-wrap;
+    }
+
+    .export-note {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .print-area {
+      display: none;
+    }
+
+    @media print {
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        background: #fff;
+        color: #111;
+      }
+
+      .app {
+        display: none;
+      }
+
+      .print-area {
+        display: block;
+        padding: 28px;
+        color: #111;
+        font-family: Arial, sans-serif;
+      }
+
+      .print-area h1 {
+        margin: 0 0 18px;
+        font-size: 22px;
+        font-weight: 700;
+      }
+
+      .print-area pre {
+        margin: 0;
+        white-space: pre-wrap;
+        font: 14px/1.55 Arial, sans-serif;
+      }
+    }
+
+    .bottom-nav {
+      display: none;
+      position: sticky;
+      bottom: 0;
+      z-index: 30;
+      background: #050607;
+      border-top: 1px solid #111;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 9px 6px 12px;
+    }
+
+    .nav-item {
+      display: grid;
+      place-items: center;
+      gap: 4px;
+      color: #a7b0b8;
+      font-size: 13px;
+      background: transparent;
+    }
+
+    .nav-item.active {
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .nav-icon {
+      width: 28px;
+      height: 28px;
+      border: 2px solid currentColor;
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 14px;
+    }
+
+    @media (max-width: 1160px) {
+      .main {
+        grid-template-columns: minmax(0, 1fr) 300px;
+        gap: 10px;
+      }
+
+      .side {
+        gap: 10px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      :root {
+        --hour-h: calc((55dvh - 72px) / 12);
+        --day-w: calc(100vw - 70px);
+        --time-w: 58px;
+        --day-count: 1;
+      }
+
+      .topbar {
+        padding: 8px 8px 6px;
+      }
+
+      .class-name {
+        font-size: 22px;
+      }
+
+      .title-row {
+        margin-bottom: 4px;
+      }
+
+      .days-head {
+        grid-template-columns: var(--time-w) repeat(5, minmax(0, 1fr));
+        max-width: none;
+        gap: 4px;
+      }
+
+      .day-name span {
+        font-size: 15px;
+      }
+
+      .main {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 56fr) minmax(0, 44fr);
+        min-height: 0;
+        padding: 0 8px 8px;
+        gap: 8px;
+      }
+
+      .schedule-shell {
+        max-height: none;
+      }
+
+      .side {
+        min-height: 0;
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 8px;
+        padding: 0;
+      }
+
+      .panel {
+        box-shadow: none;
+        overflow: hidden;
+      }
+
+      .panel-header {
+        padding: 8px 10px 6px;
+      }
+
+      .panel-title {
+        font-size: 14px;
+      }
+
+      .panel-subtitle {
+        display: none;
+      }
+
+      .editor-body,
+      .export-body {
+        padding: 8px;
+        gap: 7px;
+        overflow: auto;
+        overscroll-behavior: contain;
+      }
+
+      textarea {
+        min-height: 42px;
+        padding: 8px;
+        line-height: 1.25;
+      }
+
+      .hour-slot {
+        padding: 4px 4px 0 2px;
+      }
+
+      .hour-time {
+        font-size: 10px;
+        margin-bottom: 6px;
+        padding-right: 3px;
+      }
+
+      .hour-num {
+        font-size: 15px;
+      }
+
+      .lesson {
+        padding: 6px 7px 5px 14px;
+      }
+
+      .lesson::before {
+        left: 5px;
+        width: 4px;
+        top: 6px;
+        bottom: 6px;
+      }
+
+      .lesson-subject,
+      .lesson-teacher,
+      .lesson-room {
+        font-size: 12px;
+        line-height: 1.05;
+      }
+
+      .lesson-note-dot {
+        min-height: 14px;
+        font-size: 10px;
+      }
+
+      .lesson.is-done::after {
+        width: 18px;
+        height: 18px;
+        font-size: 12px;
+      }
+
+      .btn {
+        min-height: 30px;
+        font-size: 12px;
+        white-space: normal;
+      }
+
+      .tab {
+        height: 30px;
+        font-size: 12px;
+      }
+
+      .export-note {
+        display: none;
+      }
+
+      .toast,
+      .field-label,
+      .check-row {
+        font-size: 11px;
+      }
+    }
+
+    @media (max-width: 440px) {
+      .title-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .top-actions {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="title-row">
+        <div class="class-title">
+          <span class="class-name">GMG10C</span>
+        </div>
+      </div>
+
+      <div class="days-head" id="scheduleDays">
+        <div class="days-spacer"></div>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="schedule-shell" aria-label="Stundenplan">
+        <div class="schedule">
+          <div class="time-axis" id="timeAxis"></div>
+          <div class="grid-area" id="gridArea"></div>
+        </div>
+      </section>
+
+      <aside class="side">
+        <section class="panel" aria-label="Notiz bearbeiten">
+          <div class="panel-header">
+            <div>
+              <h1 class="panel-title" id="editorTitle">Stunde auswählen</h1>
+              <p class="panel-subtitle" id="editorMeta">Tippe im Plan auf eine Stunde oder Doppelstunde.</p>
+            </div>
+          </div>
+          <div class="editor-body" id="editorBody">
+            <div class="empty-state">Deine Notizen werden automatisch lokal für diesen Browser gespeichert, sobald du auf Speichern drückst.</div>
+          </div>
+        </section>
+
+        <section class="panel" aria-label="Export">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Export</h2>
+              <p class="panel-subtitle">Wähle einen Tag und kopiere den formatierten Text.</p>
+            </div>
+          </div>
+          <div class="export-body">
+            <div class="day-tabs" id="dayTabs"></div>
+            <textarea class="export-box" id="exportText" readonly aria-label="Exporttext"></textarea>
+            <div class="button-row">
+              <button class="btn primary" id="copyDayBtn" type="button">Tag kopieren</button>
+              <button class="btn ghost" id="copyAllBtn" type="button">Alle Tage kopieren</button>
+              <button class="btn ghost" id="pdfDayBtn" type="button">Tag als PDF</button>
+              <button class="btn ghost" id="pdfAllBtn" type="button">Alle als PDF</button>
+            </div>
+            <div class="export-note">Exportiert werden nur Stunden, in denen ein Text eingetragen ist.</div>
+            <div class="toast" id="copyToast" aria-live="polite"></div>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+  </div>
+
+  <section class="print-area" id="printArea" aria-hidden="true"></section>
+
+  <script>
+    const STORAGE_KEY = "gmg10c_stundenplan_notizen_v1";
+    const DEFAULT_DATA = { notes: {} };
+
+    const teacherNames = {
+      Adl: "Addala",
+      Gll: "Gall",
+      Hai: "Haigis",
+      Rhn: "Ringelhahn",
+      Stü: "Stühler",
+      Gör: "Görl"
+    };
+
+    const days = [
+      { id: "mo", short: "Mo", label: "Montag", date: "8. Juni" },
+      { id: "di", short: "Di", label: "Dienstag", date: "9. Juni" },
+      { id: "mi", short: "Mi", label: "Mittwoch", date: "10. Juni" },
+      { id: "do", short: "Do", label: "Donnerstag", date: "11. Juni" },
+      { id: "fr", short: "Fr", label: "Freitag", date: "12. Juni" }
+    ];
+
+    const hours = [
+      { nr: 1, time: "07:45" },
+      { nr: 2, time: "08:30" },
+      { nr: 3, time: "09:30", breakBefore: true },
+      { nr: 4, time: "10:15" },
+      { nr: 5, time: "11:15", breakBefore: true },
+      { nr: 6, time: "12:00" },
+      { nr: 7, time: "12:45" },
+      { nr: 8, time: "13:30" },
+      { nr: 9, time: "14:15" },
+      { nr: 10, time: "15:15", breakBefore: true },
+      { nr: 11, time: "16:00" },
+      { nr: 12, time: "16:45" }
+    ];
+
+    const lessons = [
+      { id: "di-1-2-btb", day: "di", start: 1, end: 2, subject: "BTB", teacher: "Gll Hai", room: "r313 r314" },
+      { id: "mi-1-2-plust", day: "mi", start: 1, end: 2, subject: "PlusT", teacher: "Gör Stü", room: "r313 r315" },
+      { id: "do-1-2-meorg", day: "do", start: 1, end: 2, subject: "MeOrg", teacher: "Rhn", room: "r313", tone: "light" },
+      { id: "fr-1-2-pug", day: "fr", start: 1, end: 2, subject: "PuG", teacher: "Rhn", room: "r213", tone: "warn" },
+      { id: "mo-3-4-e", day: "mo", start: 3, end: 4, subject: "E", teacher: "Gll", room: "r213", tone: "teal violet" },
+      { id: "di-3-fmd", day: "di", start: 3, end: 3, subject: "FMD", teacher: "Gll", room: "r313" },
+      { id: "di-4-5-meorg", day: "di", start: 4, end: 5, subject: "MeOrg", teacher: "Rhn", room: "r213" },
+      { id: "mi-3-4-bta", day: "mi", start: 3, end: 4, subject: "BTA", teacher: "Gll Stü", room: "r313 r314", tone: "light" },
+      { id: "do-3-4-bta", day: "do", start: 3, end: 4, subject: "BTA", teacher: "Gör Stü", room: "r313 r315", tone: "light" },
+      { id: "fr-3-e", day: "fr", start: 3, end: 3, subject: "E", teacher: "Rhn", room: "r213", tone: "teal violet" },
+      { id: "fr-4-6-bta", day: "fr", start: 4, end: 6, subject: "BTA", teacher: "Gll", room: "r313", tone: "light" },
+      { id: "mo-5-pug", day: "mo", start: 5, end: 5, subject: "PuG", teacher: "Rej", room: "r213", tone: "teal" },
+      { id: "mi-5-6-bta", day: "mi", start: 5, end: 6, subject: "BTA", teacher: "Gll", room: "r313", tone: "light" },
+      { id: "do-5-plust", day: "do", start: 5, end: 5, subject: "PlusT", teacher: "Gör R...", room: "r313 r...", tone: "warn" },
+      { id: "do-6-plusm", day: "do", start: 6, end: 6, subject: "PlusM", teacher: "Rhn", room: "r313", tone: "light" },
+      { id: "mo-7-8-btb", day: "mo", start: 7, end: 8, subject: "BTB", teacher: "Gll Gll", room: "r313 r314", tone: "teal" },
+      { id: "di-8-10-btb", day: "di", start: 8, end: 10, subject: "BTB", teacher: "Hai Stü", room: "r314 r315" },
+      { id: "mi-8-9-btb", day: "mi", start: 8, end: 9, subject: "BTB", teacher: "Hai", room: "r213", tone: "light" },
+      { id: "do-8-9-plusm", day: "do", start: 8, end: 9, subject: "PlusM", teacher: "Rhn", room: "r213", tone: "light" },
+      { id: "mo-9-10-bta", day: "mo", start: 9, end: 10, subject: "BTA", teacher: "Hai", room: "r313", tone: "orange" }
+    ];
+
+    const savedData = loadData();
+    const state = {
+      notes: savedData.notes,
+      selectedLessonId: null,
+      scheduleDay: "mo",
+      exportDay: "mo"
+    };
+
+    const scheduleShell = document.querySelector(".schedule-shell");
+    const scheduleDays = document.querySelector("#scheduleDays");
+    const timeAxis = document.querySelector("#timeAxis");
+    const gridArea = document.querySelector("#gridArea");
+    const editorTitle = document.querySelector("#editorTitle");
+    const editorMeta = document.querySelector("#editorMeta");
+    const editorBody = document.querySelector("#editorBody");
+    const dayTabs = document.querySelector("#dayTabs");
+    const exportText = document.querySelector("#exportText");
+    const copyDayBtn = document.querySelector("#copyDayBtn");
+    const copyAllBtn = document.querySelector("#copyAllBtn");
+    const pdfDayBtn = document.querySelector("#pdfDayBtn");
+    const pdfAllBtn = document.querySelector("#pdfAllBtn");
+    const copyToast = document.querySelector("#copyToast");
+    const printArea = document.querySelector("#printArea");
+
+    function loadData() {
+      try {
+        const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (!data) return { ...DEFAULT_DATA };
+        if (data.notes) {
+          return {
+            notes: data.notes || {}
+          };
+        }
+        return { notes: data };
+      } catch {
+        return { ...DEFAULT_DATA };
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        notes: state.notes
+      }));
+    }
+
+    function isMobileSchedule() {
+      return window.matchMedia("(max-width: 760px)").matches;
+    }
+
+    function getVisibleDays() {
+      if (!isMobileSchedule()) return days;
+      return days.filter((day) => day.id === state.scheduleDay);
+    }
+
+    function updateScheduleLayout() {
+      const visibleDays = getVisibleDays();
+      const shellRect = scheduleShell.getBoundingClientRect();
+      const rootStyle = getComputedStyle(document.documentElement);
+      const timeWidth = Number.parseFloat(rootStyle.getPropertyValue("--time-w")) || 82;
+      const dayWidth = Math.max(42, Math.floor((shellRect.width - timeWidth) / visibleDays.length));
+      const hourHeight = Math.max(22, shellRect.height / 12);
+
+      document.documentElement.style.setProperty("--day-count", String(visibleDays.length));
+      document.documentElement.style.setProperty("--day-w", `${dayWidth}px`);
+      document.documentElement.style.setProperty("--hour-h", `${hourHeight}px`);
+    }
+
+    function getLesson(id) {
+      return lessons.find((lesson) => lesson.id === id);
+    }
+
+    function getEntry(id) {
+      return state.notes[id] || { text: "", done: false };
+    }
+
+    function setEntry(id, entry) {
+      state.notes[id] = {
+        text: entry.text.trim(),
+        done: Boolean(entry.done)
+      };
+
+      if (!state.notes[id].text && !state.notes[id].done) {
+        delete state.notes[id];
+      }
+
+      saveData();
+    }
+
+    function lessonTouchesAnyHour(lesson, hourNumbers) {
+      for (let hour = lesson.start; hour <= lesson.end; hour += 1) {
+        if (hourNumbers.includes(hour)) return true;
+      }
+      return false;
+    }
+
+    function getDisplayTeacherAbbreviation(lesson) {
+      if (lesson.day === "mo" && lessonTouchesAnyHour(lesson, [3, 4, 5])) return "Adl";
+      if (lesson.day === "fr" && lessonTouchesAnyHour(lesson, [1, 2, 3])) return "Adl";
+      return lesson.teacher;
+    }
+
+    function getExportTeacher(lesson) {
+      return expandTeacherNames(getDisplayTeacherAbbreviation(lesson));
+    }
+
+    function expandTeacherNames(value) {
+      return String(value)
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((part) => teacherNames[part] || part)
+        .join(" ");
+    }
+
+    function hourLabel(lesson) {
+      if (lesson.start === lesson.end) return `${lesson.start}. Stunde`;
+      if (lesson.end === lesson.start + 1) return `${lesson.start}. und ${lesson.end}. Stunde`;
+      return `${lesson.start}. bis ${lesson.end}. Stunde`;
+    }
+
+    function renderTimeAxis() {
+      timeAxis.innerHTML = "";
+      hours.forEach((hour) => {
+        const slot = document.createElement("div");
+        slot.className = `hour-slot${hour.breakBefore ? " break-before" : ""}`;
+        slot.innerHTML = `<span class="hour-time">${hour.time}</span><span class="hour-num">${hour.nr}.</span>`;
+        timeAxis.append(slot);
+      });
+    }
+
+    function renderScheduleDays() {
+      scheduleDays.innerHTML = '<div class="days-spacer"></div>';
+      days.forEach((day) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `day-name${day.id === state.scheduleDay ? " is-selected" : ""}`;
+        button.innerHTML = `<span>${day.short}</span>`;
+        button.addEventListener("click", () => {
+          state.scheduleDay = day.id;
+          state.exportDay = day.id;
+          renderScheduleDays();
+          renderTabs();
+          renderExport();
+          renderGrid();
+        });
+        scheduleDays.append(button);
+      });
+    }
+
+    function renderGrid() {
+      gridArea.innerHTML = "";
+      updateScheduleLayout();
+      const visibleDays = getVisibleDays();
+
+      hours.forEach((hour) => {
+        for (let dayIndex = 0; dayIndex < visibleDays.length; dayIndex += 1) {
+          const line = document.createElement("div");
+          line.className = `grid-line${hour.breakBefore ? " break-before" : ""}`;
+          gridArea.append(line);
+        }
+      });
+
+      lessons.forEach((lesson) => {
+        const entry = getEntry(lesson.id);
+        const button = document.createElement("button");
+        const col = visibleDays.findIndex((day) => day.id === lesson.day);
+        if (col < 0) return;
+        const displayTeacher = getDisplayTeacherAbbreviation(lesson);
+        button.className = "lesson";
+        if (lesson.id === state.selectedLessonId) button.classList.add("is-active");
+        if (entry.text) button.classList.add("has-text");
+        if (entry.text && entry.done) button.classList.add("is-done");
+        if (lesson.tone) button.dataset.tone = lesson.tone;
+        button.style.setProperty("--col", col);
+        button.style.setProperty("--start", lesson.start);
+        button.style.setProperty("--span", lesson.end - lesson.start + 1);
+        button.type = "button";
+        button.setAttribute("aria-label", `${hourLabel(lesson)} ${lesson.subject} ${displayTeacher}`);
+        button.innerHTML = `
+          <span class="lesson-subject">${escapeHtml(lesson.subject)}</span>
+          <span class="lesson-teacher">${escapeHtml(displayTeacher)}</span>
+          <span class="lesson-room">${escapeHtml(lesson.room)}</span>
+          <span class="lesson-note-dot">${entry.done ? "fertig" : "Notiz"}</span>
+        `;
+        button.addEventListener("click", () => selectLesson(lesson.id));
+        gridArea.append(button);
+      });
+    }
+
+    function renderTabs() {
+      dayTabs.innerHTML = "";
+      days.forEach((day) => {
+        const tab = document.createElement("button");
+        tab.type = "button";
+        tab.className = `tab${day.id === state.exportDay ? " is-selected" : ""}`;
+        tab.textContent = day.short;
+        tab.addEventListener("click", () => {
+          state.exportDay = day.id;
+          copyToast.textContent = "";
+          renderTabs();
+          renderExport();
+        });
+        dayTabs.append(tab);
+      });
+    }
+
+    function selectLesson(id) {
+      state.selectedLessonId = id;
+      renderGrid();
+      renderEditor();
+    }
+
+    function renderEditor() {
+      const lesson = getLesson(state.selectedLessonId);
+      if (!lesson) {
+        editorTitle.textContent = "Stunde auswählen";
+        editorMeta.textContent = "Tippe im Plan auf eine Stunde oder Doppelstunde.";
+        editorBody.innerHTML = `<div class="empty-state">Deine Notizen werden automatisch lokal für diesen Browser gespeichert, sobald du auf Speichern drückst.</div>`;
+        return;
+      }
+
+      const day = days.find((item) => item.id === lesson.day);
+      const entry = getEntry(lesson.id);
+      const displayTeacher = getDisplayTeacherAbbreviation(lesson);
+      editorTitle.textContent = `${hourLabel(lesson)} · ${lesson.subject}`;
+      editorMeta.textContent = `${day.label}, ${displayTeacher}, ${lesson.room}`;
+      editorBody.innerHTML = `
+        <label class="field-label" for="noteInput">Notiz für diese Stunde</label>
+        <textarea id="noteInput" placeholder="Was soll für diese Stunde im Wochenbericht stehen?">${escapeHtml(entry.text)}</textarea>
+        <label class="check-row">
+          <input type="checkbox" id="doneInput" ${entry.done ? "checked" : ""}>
+          <span>Fertig bearbeitet markieren</span>
+        </label>
+        <div class="button-row">
+          <button class="btn primary" id="saveBtn" type="button">Speichern</button>
+          <button class="btn ghost" id="clearBtn" type="button">Leeren</button>
+        </div>
+        <div class="toast" id="saveToast" aria-live="polite"></div>
+      `;
+
+      const noteInput = document.querySelector("#noteInput");
+      const doneInput = document.querySelector("#doneInput");
+      const saveBtn = document.querySelector("#saveBtn");
+      const clearBtn = document.querySelector("#clearBtn");
+      const saveToast = document.querySelector("#saveToast");
+
+      saveBtn.addEventListener("click", () => {
+        setEntry(lesson.id, { text: noteInput.value, done: doneInput.checked });
+        saveToast.textContent = "Gespeichert.";
+        renderGrid();
+        renderExport();
+      });
+
+      clearBtn.addEventListener("click", () => {
+        noteInput.value = "";
+        doneInput.checked = false;
+        setEntry(lesson.id, { text: "", done: false });
+        saveToast.textContent = "Eintrag geleert.";
+        renderGrid();
+        renderExport();
+      });
+    }
+
+    function exportForDay(dayId) {
+      return lessons
+        .filter((lesson) => lesson.day === dayId)
+        .sort((a, b) => a.start - b.start)
+        .map((lesson) => {
+          const entry = getEntry(lesson.id);
+          if (!entry.text) return "";
+          return `${hourLabel(lesson)} ${lesson.subject} ${getExportTeacher(lesson)}: ${entry.text}`;
+        })
+        .filter(Boolean)
+        .join("\n");
+    }
+
+    function renderExport() {
+      const day = days.find((item) => item.id === state.exportDay);
+      const text = exportForDay(state.exportDay);
+      exportText.value = text || `${day.label}: Noch keine Notizen mit Text eingetragen.`;
+    }
+
+    function exportAllDays() {
+      return days
+        .map((day) => {
+          const text = exportForDay(day.id);
+          return text ? `${day.label}\n${text}` : "";
+        })
+        .filter(Boolean)
+        .join("\n\n");
+    }
+
+    function printExport(title, text) {
+      if (!text.trim()) {
+        copyToast.textContent = "Es gibt noch keinen Text für den PDF-Export.";
+        return;
+      }
+
+      printArea.innerHTML = `
+        <h1>${escapeHtml(title)}</h1>
+        <pre>${escapeHtml(text)}</pre>
+      `;
+      window.print();
+    }
+
+    async function copyText(text) {
+      if (!text.trim()) return false;
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        exportText.focus();
+        exportText.select();
+        return document.execCommand("copy");
+      }
+    }
+
+    copyDayBtn.addEventListener("click", async () => {
+      const text = exportForDay(state.exportDay);
+      const ok = await copyText(text);
+      copyToast.textContent = ok ? "Tag wurde kopiert." : "Kopieren war nicht möglich.";
+    });
+
+    copyAllBtn.addEventListener("click", async () => {
+      const text = exportAllDays();
+      const ok = await copyText(text);
+      copyToast.textContent = ok ? "Alle vorhandenen Tage wurden kopiert." : "Kopieren war nicht möglich.";
+    });
+
+    pdfDayBtn.addEventListener("click", () => {
+      const day = days.find((item) => item.id === state.exportDay);
+      printExport(`${day.label} - Stundenplan-Notizen`, exportForDay(state.exportDay));
+    });
+
+    pdfAllBtn.addEventListener("click", () => {
+      printExport("Stundenplan-Notizen", exportAllDays());
+    });
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    window.addEventListener("resize", () => {
+      renderScheduleDays();
+      renderGrid();
+    });
+
+    renderScheduleDays();
+    renderTimeAxis();
+    renderGrid();
+    renderTabs();
+    renderExport();
+  </script>
+</body>
+</html>
