@@ -119,6 +119,15 @@
       white-space: nowrap;
     }
 
+    .sync-status {
+      justify-self: end;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.2;
+      text-align: right;
+      white-space: nowrap;
+    }
+
     .chevron {
       width: 20px;
       height: 20px;
@@ -677,6 +686,10 @@
         font-size: 22px;
       }
 
+      .sync-status {
+        font-size: 10px;
+      }
+
       .title-row {
         margin-bottom: 4px;
       }
@@ -825,6 +838,7 @@
         <div class="class-title">
           <span class="class-name">GMG10C</span>
         </div>
+        <div class="sync-status" id="syncStatus">Lokal</div>
       </div>
 
       <div class="days-head" id="scheduleDays">
@@ -882,7 +896,18 @@
 
   <script>
     const STORAGE_KEY = "gmg10c_stundenplan_notizen_v1";
+    const PLAN_ID = "gmg10c";
+    const FIREBASE_SDK_VERSION = "10.12.5";
     const DEFAULT_DATA = { notes: {} };
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDWYcL4LhkKw-7NwnByjyHDrBJyuJx_3Ls",
+      authDomain: "stundenplan-4cd96.firebaseapp.com",
+      projectId: "stundenplan-4cd96",
+      storageBucket: "stundenplan-4cd96.firebasestorage.app",
+      messagingSenderId: "446054068766",
+      appId: "1:446054068766:web:942491ffb4fc7d8d02740f"
+    };
 
     const teacherNames = {
       Adl: "Addala",
@@ -961,7 +986,14 @@
     const pdfDayBtn = document.querySelector("#pdfDayBtn");
     const pdfAllBtn = document.querySelector("#pdfAllBtn");
     const copyToast = document.querySelector("#copyToast");
+    const syncStatus = document.querySelector("#syncStatus");
     const printArea = document.querySelector("#printArea");
+
+    let remotePlanRef = null;
+    let setRemoteDoc = null;
+    let remoteServerTimestamp = null;
+    let remoteSaveTimer = null;
+    let applyingRemoteData = false;
 
     function loadData() {
       try {
@@ -982,6 +1014,74 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         notes: state.notes
       }));
+      if (!applyingRemoteData) queueRemoteSave();
+    }
+
+    function setSyncStatus(text) {
+      syncStatus.textContent = text;
+    }
+
+    function hasAnyNotes(notes) {
+      return Object.values(notes).some((entry) => entry && (entry.text || entry.done));
+    }
+
+    function applyRemoteNotes(notes) {
+      applyingRemoteData = true;
+      state.notes = notes || {};
+      saveData();
+      applyingRemoteData = false;
+      renderGrid();
+      renderEditor();
+      renderExport();
+    }
+
+    function queueRemoteSave() {
+      if (!remotePlanRef || !setRemoteDoc) return;
+      window.clearTimeout(remoteSaveTimer);
+      setSyncStatus("Speichert online...");
+      remoteSaveTimer = window.setTimeout(async () => {
+        try {
+          await setRemoteDoc(remotePlanRef, {
+            notes: state.notes,
+            updatedAt: remoteServerTimestamp()
+          }, { merge: true });
+          setSyncStatus("Online gespeichert");
+        } catch (error) {
+          console.error(error);
+          setSyncStatus("Nur lokal gespeichert");
+        }
+      }, 250);
+    }
+
+    async function setupFirebaseSync() {
+      try {
+        setSyncStatus("Verbinde...");
+        const appModule = await import(`https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}/firebase-app.js`);
+        const firestoreModule = await import(`https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}/firebase-firestore.js`);
+        const app = appModule.initializeApp(firebaseConfig);
+        const db = firestoreModule.getFirestore(app);
+
+        remotePlanRef = firestoreModule.doc(db, "stundenplaene", PLAN_ID);
+        setRemoteDoc = firestoreModule.setDoc;
+        remoteServerTimestamp = firestoreModule.serverTimestamp;
+
+        firestoreModule.onSnapshot(remotePlanRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.data();
+            applyRemoteNotes(data.notes || {});
+            setSyncStatus("Online synchron");
+          } else {
+            setSyncStatus("Online bereit");
+            if (hasAnyNotes(state.notes)) queueRemoteSave();
+          }
+        }, (error) => {
+          console.error(error);
+          setSyncStatus("Nur lokal");
+        });
+      } catch (error) {
+        console.error(error);
+        setSyncStatus("Nur lokal");
+      }
     }
 
     function isMobileSchedule() {
@@ -1295,6 +1395,7 @@
     renderGrid();
     renderTabs();
     renderExport();
+    setupFirebaseSync();
   </script>
 </body>
 </html>
