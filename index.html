@@ -68,7 +68,7 @@
       z-index: 30;
       background: rgb(5 6 7 / 0.96);
       border-bottom: 1px solid #1c2226;
-      padding: 14px clamp(12px, 3vw, 28px) 12px;
+      padding: 14px clamp(12px, 3vw, 28px);
       backdrop-filter: blur(12px);
     }
 
@@ -77,7 +77,6 @@
       align-items: center;
       justify-content: space-between;
       gap: 14px;
-      margin-bottom: 12px;
     }
 
     .class-title {
@@ -110,10 +109,14 @@
 
     .days-head {
       display: grid;
-      grid-template-columns: var(--time-w) repeat(5, minmax(0, 1fr));
-      gap: 8px;
+      width: calc(var(--time-w) + var(--day-w) * var(--day-count));
+      grid-template-columns: var(--time-w) repeat(var(--day-count), var(--day-w));
+      gap: 0;
       align-items: center;
       color: var(--muted);
+      border-bottom: 1px solid #273137;
+      background: #111518;
+      overflow: hidden;
     }
 
     .days-spacer {
@@ -121,9 +124,10 @@
     }
 
     .day-name {
-      min-height: 38px;
-      border-radius: var(--radius);
-      background: #171c20;
+      min-height: 42px;
+      border-left: 1px solid #273137;
+      border-radius: 0;
+      background: #14191d;
       color: #c8d2d8;
       text-align: center;
       line-height: 1;
@@ -161,6 +165,7 @@
     .schedule-shell {
       min-width: 0;
       overflow: auto;
+      border-radius: var(--radius);
       scrollbar-width: thin;
       scrollbar-color: #4a565e #151719;
     }
@@ -184,8 +189,9 @@
 
     .hour-slot {
       height: var(--hour-h);
+      position: relative;
       border-bottom: 1px solid var(--line);
-      padding: 10px 8px 0;
+      padding: 9px 8px;
       color: #aeb9c0;
       text-align: right;
     }
@@ -196,14 +202,15 @@
 
     .hour-time {
       display: block;
-      margin-bottom: 12px;
       font-size: 13px;
       line-height: 1;
     }
 
     .hour-num {
-      display: block;
-      padding-right: 2px;
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
       font-size: 20px;
       line-height: 1;
       font-weight: 650;
@@ -544,6 +551,7 @@
       }
 
       .days-head {
+        width: auto;
         grid-template-columns: var(--time-w) repeat(5, minmax(44px, 1fr));
         gap: 5px;
       }
@@ -649,13 +657,13 @@
         <div class="sync-status" id="syncStatus">Lokal</div>
       </div>
 
-      <div class="days-head" id="scheduleDays">
-        <div class="days-spacer"></div>
-      </div>
     </header>
 
     <main class="main">
       <section class="schedule-shell" aria-label="Stundenplan">
+        <div class="days-head" id="scheduleDays">
+          <div class="days-spacer"></div>
+        </div>
         <div class="schedule">
           <div class="time-axis" id="timeAxis"></div>
           <div class="grid-area" id="gridArea"></div>
