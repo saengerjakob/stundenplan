@@ -48,7 +48,8 @@
 
     button,
     textarea,
-    input {
+    input,
+    select {
       font: inherit;
     }
 
@@ -105,6 +106,18 @@
       background: #111518;
       font-size: 12px;
       line-height: 1;
+      white-space: nowrap;
+    }
+
+    .top-action {
+      height: 34px;
+      border: 1px solid #303b42;
+      border-radius: var(--radius);
+      padding: 0 12px;
+      background: #151b1f;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 650;
       white-space: nowrap;
     }
 
@@ -593,6 +606,212 @@
       margin-top: 8px;
     }
 
+    .settings-modal {
+      width: min(1180px, 100%);
+      max-height: min(860px, 94dvh);
+      overflow: hidden;
+      border: 1px solid #334047;
+      border-radius: 12px;
+      background: #121619;
+      box-shadow: 0 24px 70px rgb(0 0 0 / 0.58);
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .settings-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      border-bottom: 1px solid #283238;
+    }
+
+    .settings-head h2 {
+      margin: 0;
+      font-size: 23px;
+      line-height: 1.15;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #334047;
+      border-radius: var(--radius);
+      background: #1a2024;
+      color: var(--text);
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .settings-grid {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(300px, 0.82fr) minmax(520px, 1.18fr);
+      gap: 0;
+      overflow: hidden;
+    }
+
+    .settings-section {
+      min-height: 0;
+      overflow: auto;
+      padding: 18px;
+    }
+
+    .settings-section + .settings-section {
+      border-left: 1px solid #283238;
+    }
+
+    .settings-section h3 {
+      margin: 0 0 6px;
+      font-size: 17px;
+    }
+
+    .settings-hint {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .week-settings-list,
+    .template-list,
+    .lesson-editor-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .week-plan-row,
+    .template-card,
+    .lesson-edit-row {
+      border: 1px solid #303b42;
+      border-radius: var(--radius);
+      background: #171c20;
+    }
+
+    .week-plan-row {
+      display: grid;
+      grid-template-columns: minmax(120px, 1fr) 132px minmax(160px, 1fr);
+      gap: 8px;
+      align-items: center;
+      padding: 10px;
+    }
+
+    .week-plan-row.is-current {
+      border-color: var(--green);
+    }
+
+    .week-plan-row.is-drop-target {
+      border-color: var(--orange);
+      background: #241914;
+    }
+
+    .week-plan-label {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .week-plan-title {
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .week-plan-subtitle {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .settings-select,
+    .settings-input {
+      width: 100%;
+      min-height: 34px;
+      border: 1px solid #303b42;
+      border-radius: var(--radius);
+      background: #101417;
+      color: var(--text);
+      padding: 7px 9px;
+      font-size: 13px;
+    }
+
+    .template-toolbar,
+    .template-editor-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .template-list {
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      margin-bottom: 16px;
+    }
+
+    .template-card {
+      padding: 10px;
+      text-align: left;
+      color: var(--text);
+    }
+
+    .template-card.is-selected {
+      border-color: var(--green);
+      background: #17231f;
+    }
+
+    .template-card-title {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .template-card-meta {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .template-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 160px;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .lesson-edit-row {
+      display: grid;
+      grid-template-columns: 88px 62px 62px minmax(90px, 1fr) minmax(110px, 1fr) minmax(90px, 1fr) 34px;
+      gap: 6px;
+      align-items: center;
+      padding: 8px;
+    }
+
+    .lesson-remove {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius);
+      background: #2a1a19;
+      color: #ffb8a8;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .settings-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
     @media (max-width: 1280px) {
       .main {
         grid-template-columns: 1fr;
@@ -625,9 +844,37 @@
         order: 3;
       }
 
+      .top-action {
+        order: 4;
+      }
+
       .week-select {
         min-width: 0;
         flex: 1;
+      }
+
+      .settings-modal {
+        max-height: 96dvh;
+      }
+
+      .settings-grid {
+        grid-template-columns: 1fr;
+        overflow: auto;
+      }
+
+      .settings-section + .settings-section {
+        border-left: 0;
+        border-top: 1px solid #283238;
+      }
+
+      .week-plan-row,
+      .lesson-edit-row,
+      .template-form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .lesson-remove {
+        width: 100%;
       }
 
       .class-name {
@@ -748,6 +995,7 @@
           <select class="week-select" id="weekSelect" aria-label="Woche auswählen"></select>
           <button class="week-step" id="nextWeekBtn" type="button" aria-label="Nächste Woche">›</button>
         </div>
+        <button class="top-action" id="settingsBtn" type="button">Einstellungen</button>
         <div class="sync-status" id="syncStatus">Lokal</div>
       </div>
 
@@ -819,6 +1067,36 @@
     </section>
   </div>
 
+  <div class="modal-backdrop" id="settingsModal" hidden>
+    <section class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="settings-head">
+        <div>
+          <h2 id="settingsTitle">Einstellungen</h2>
+          <p class="settings-hint">Plane Wochen als Berufsschule oder MAK und ziehe Stundenplan-Versionen auf die passenden Wochen.</p>
+        </div>
+        <button class="icon-btn" id="settingsCloseBtn" type="button" aria-label="Einstellungen schließen">×</button>
+      </div>
+      <div class="settings-grid">
+        <section class="settings-section" aria-label="Wochen planen">
+          <h3>Wochen planen</h3>
+          <p class="settings-hint">Vorlage greifen und auf eine Woche ziehen. Am Handy kannst du die Dropdowns nutzen.</p>
+          <div class="week-settings-list" id="weekSettingsList"></div>
+        </section>
+        <section class="settings-section" aria-label="Stundenplan-Versionen">
+          <div class="template-toolbar">
+            <div>
+              <h3>Stundenplan-Versionen</h3>
+              <p class="settings-hint">Bearbeitete Vorlagen werden dauerhaft gespeichert und online synchronisiert.</p>
+            </div>
+            <button class="btn primary" id="newTemplateBtn" type="button">Neue Version</button>
+          </div>
+          <div class="template-list" id="templateList"></div>
+          <div class="template-editor" id="templateEditor"></div>
+        </section>
+      </div>
+    </section>
+  </div>
+
   <section class="print-area" id="printArea" aria-hidden="true"></section>
 
   <script>
@@ -845,6 +1123,14 @@
       Gör: "Görl"
     };
 
+    const DEFAULT_TEMPLATE_ID = "berufsschule-standard";
+    const DEFAULT_MAK_TEMPLATE_ID = "mak-standard";
+
+    const weekTypes = {
+      berufsschule: "Berufsschule",
+      mak: "MAK"
+    };
+
     const days = [
       { id: "mo", short: "Mo", label: "Montag", date: "8. Juni" },
       { id: "di", short: "Di", label: "Dienstag", date: "9. Juni" },
@@ -868,7 +1154,7 @@
       { nr: 12, time: "16:45" }
     ];
 
-    const lessons = [
+    const defaultLessons = [
       { id: "di-1-2-btb", day: "di", start: 1, end: 2, subject: "BTB", teacher: "Gll Hai", room: "r313 r314" },
       { id: "mi-1-2-plust", day: "mi", start: 1, end: 2, subject: "PlusT", teacher: "Gör Stü", room: "r313 r315" },
       { id: "do-1-2-meorg", day: "do", start: 1, end: 2, subject: "MeOrg", teacher: "Rhn", room: "r313", tone: "light" },
@@ -885,17 +1171,34 @@
       { id: "mi-5-6-bta", day: "mi", start: 5, end: 6, subject: "BTA", teacher: "Gll", room: "r313", tone: "light" },
       { id: "do-5-plust", day: "do", start: 5, end: 5, subject: "PlusT", teacher: "Gör R...", room: "r313 r...", tone: "warn" },
       { id: "do-6-plusm", day: "do", start: 6, end: 6, subject: "PlusM", teacher: "Rhn", room: "r313", tone: "light" },
-      { id: "mo-7-8-btb", day: "mo", start: 7, end: 8, subject: "BTB", teacher: "Gll Gll", room: "r313 r314", tone: "teal" },
+      { id: "mo-7-8-btb", day: "mo", start: 7, end: 8, subject: "BTB", teacher: "Adl Gll", room: "r313 r314", tone: "teal" },
       { id: "di-8-10-btb", day: "di", start: 8, end: 10, subject: "BTB", teacher: "Hai Stü", room: "r314 r315" },
       { id: "mi-8-9-btb", day: "mi", start: 8, end: 9, subject: "BTB", teacher: "Hai", room: "r213", tone: "light" },
       { id: "do-8-9-plusm", day: "do", start: 8, end: 9, subject: "PlusM", teacher: "Rhn", room: "r213", tone: "light" },
       { id: "mo-9-10-bta", day: "mo", start: 9, end: 10, subject: "BTA", teacher: "Hai", room: "r313", tone: "orange" }
     ];
 
+    const defaultTemplates = [
+      {
+        id: DEFAULT_TEMPLATE_ID,
+        name: "Berufsschule Standard",
+        type: "berufsschule",
+        lessons: defaultLessons
+      },
+      {
+        id: DEFAULT_MAK_TEMPLATE_ID,
+        name: "MAK Standard",
+        type: "mak",
+        lessons: []
+      }
+    ];
+
     const savedData = loadData();
     const state = {
       weeks: savedData.weeks,
       selectedWeek: savedData.selectedWeek,
+      templates: savedData.templates,
+      activeTemplateId: savedData.activeTemplateId,
       selectedLessonId: null,
       scheduleDay: "mo",
       exportDay: "mo"
@@ -923,6 +1226,13 @@
     const printArea = document.querySelector("#printArea");
     const introModal = document.querySelector("#introModal");
     const introCloseBtn = document.querySelector("#introCloseBtn");
+    const settingsBtn = document.querySelector("#settingsBtn");
+    const settingsModal = document.querySelector("#settingsModal");
+    const settingsCloseBtn = document.querySelector("#settingsCloseBtn");
+    const weekSettingsList = document.querySelector("#weekSettingsList");
+    const templateList = document.querySelector("#templateList");
+    const templateEditor = document.querySelector("#templateEditor");
+    const newTemplateBtn = document.querySelector("#newTemplateBtn");
 
     let remotePlanRef = null;
     let setRemoteDoc = null;
@@ -935,30 +1245,43 @@
       try {
         const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
         if (!data) {
-          return { weeks: createEmptyWeeks(currentWeek), selectedWeek: currentWeek };
+          return createDefaultData(currentWeek);
         }
+        const templates = normalizeTemplates(data.templates);
+        const activeTemplateId = getExistingTemplateId(data.activeTemplateId, templates);
         if (data.weeks) {
           return {
             weeks: normalizeWeeks(data.weeks),
-            selectedWeek: data.selectedWeek || currentWeek
+            selectedWeek: data.selectedWeek || currentWeek,
+            templates,
+            activeTemplateId
           };
         }
         if (data.notes) {
           return {
             weeks: createEmptyWeeks(currentWeek, data.notes),
-            selectedWeek: data.selectedWeek || currentWeek
+            selectedWeek: data.selectedWeek || currentWeek,
+            templates,
+            activeTemplateId
           };
         }
-        return { weeks: createEmptyWeeks(currentWeek, data), selectedWeek: currentWeek };
+        return {
+          weeks: createEmptyWeeks(currentWeek, data),
+          selectedWeek: currentWeek,
+          templates,
+          activeTemplateId
+        };
       } catch {
-        return { weeks: createEmptyWeeks(currentWeek), selectedWeek: currentWeek };
+        return createDefaultData(currentWeek);
       }
     }
 
     function saveData() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         weeks: state.weeks,
-        selectedWeek: state.selectedWeek
+        selectedWeek: state.selectedWeek,
+        templates: state.templates,
+        activeTemplateId: state.activeTemplateId
       }));
       if (!applyingRemoteData) queueRemoteSave();
     }
@@ -1019,20 +1342,84 @@
       return Array.from(keys).filter(Boolean).sort();
     }
 
+    function createDefaultData(currentWeek = getCurrentWeekKey()) {
+      return {
+        weeks: createEmptyWeeks(currentWeek),
+        selectedWeek: currentWeek,
+        templates: normalizeTemplates(),
+        activeTemplateId: DEFAULT_TEMPLATE_ID
+      };
+    }
+
+    function cloneLessons(lessons) {
+      return (lessons || []).map((lesson) => ({ ...lesson }));
+    }
+
+    function normalizeTemplates(templates = defaultTemplates) {
+      const source = Array.isArray(templates) && templates.length ? templates : defaultTemplates;
+      const normalized = source
+        .filter((template) => template && template.id)
+        .map((template) => ({
+          id: String(template.id),
+          name: template.name || "Stundenplan",
+          type: weekTypes[template.type] ? template.type : "berufsschule",
+          lessons: cloneLessons(template.lessons)
+        }));
+
+      defaultTemplates.forEach((template) => {
+        if (!normalized.some((item) => item.id === template.id)) {
+          normalized.push({
+            id: template.id,
+            name: template.name,
+            type: template.type,
+            lessons: cloneLessons(template.lessons)
+          });
+        }
+      });
+
+      return normalized;
+    }
+
+    function getExistingTemplateId(templateId, templates = state.templates) {
+      if (templates.some((template) => template.id === templateId)) return templateId;
+      return templates[0]?.id || DEFAULT_TEMPLATE_ID;
+    }
+
+    function getDefaultTemplateIdForType(type) {
+      if (type === "mak") return DEFAULT_MAK_TEMPLATE_ID;
+      return DEFAULT_TEMPLATE_ID;
+    }
+
+    function createWeekData(notes = {}, type = "berufsschule", templateId = getDefaultTemplateIdForType(type)) {
+      const safeType = weekTypes[type] ? type : "berufsschule";
+      return {
+        notes: notes || {},
+        type: safeType,
+        templateId: templateId || getDefaultTemplateIdForType(safeType)
+      };
+    }
+
     function normalizeWeeks(weeks) {
       return Object.fromEntries(Object.entries(weeks || {}).map(([key, value]) => [
         key,
-        { notes: value && value.notes ? value.notes : {} }
+        createWeekData(
+          value && value.notes ? value.notes : {},
+          value && value.type ? value.type : "berufsschule",
+          value && value.templateId ? value.templateId : undefined
+        )
       ]));
     }
 
     function createEmptyWeeks(weekKey, notes = {}) {
-      return { [weekKey]: { notes: notes || {} } };
+      return { [weekKey]: createWeekData(notes) };
     }
 
     function getWeekData(weekKey = state.selectedWeek) {
       if (!state.weeks[weekKey]) {
-        state.weeks[weekKey] = { notes: {} };
+        state.weeks[weekKey] = createWeekData();
+      }
+      if (!getTemplateById(state.weeks[weekKey].templateId)) {
+        state.weeks[weekKey].templateId = getDefaultTemplateIdForType(state.weeks[weekKey].type);
       }
       return state.weeks[weekKey];
     }
@@ -1043,8 +1430,47 @@
 
     function ensureWeek(weekKey) {
       if (!state.weeks[weekKey]) {
-        state.weeks[weekKey] = { notes: {} };
+        state.weeks[weekKey] = createWeekData();
       }
+    }
+
+    function getWeekTypeLabel(type) {
+      return weekTypes[type] || weekTypes.berufsschule;
+    }
+
+    function getTemplateById(templateId) {
+      return state.templates.find((template) => template.id === templateId);
+    }
+
+    function getTemplatesByType(type) {
+      return state.templates.filter((template) => template.type === type);
+    }
+
+    function getActiveWeekData() {
+      return getWeekData(state.selectedWeek);
+    }
+
+    function getActiveTemplate() {
+      const week = getActiveWeekData();
+      return getTemplateById(week.templateId) || getTemplateById(getDefaultTemplateIdForType(week.type)) || state.templates[0];
+    }
+
+    function getActiveLessons() {
+      return getActiveTemplate()?.lessons || [];
+    }
+
+    function renderAfterScheduleChange() {
+      if (state.selectedLessonId && !getLesson(state.selectedLessonId)) {
+        state.selectedLessonId = null;
+      }
+      renderWeekSelect();
+      renderScheduleDays();
+      renderGrid();
+      renderEditor();
+      renderTabs();
+      renderExport();
+      renderSettings();
+      updateNowLine();
     }
 
     function hasAnyWeekNotes(weeks) {
@@ -1053,26 +1479,28 @@
       ));
     }
 
-    function applyRemoteWeeks(weeks) {
+    function applyRemoteData(data) {
       applyingRemoteData = true;
-      state.weeks = normalizeWeeks(weeks);
+      state.weeks = normalizeWeeks(data.weeks || createEmptyWeeks(state.selectedWeek, data.notes || {}));
+      state.templates = normalizeTemplates(data.templates);
+      state.activeTemplateId = getExistingTemplateId(data.activeTemplateId, state.templates);
       if (!state.weeks[state.selectedWeek]) {
-        state.weeks[state.selectedWeek] = { notes: {} };
+        state.weeks[state.selectedWeek] = createWeekData();
       }
       saveData();
       applyingRemoteData = false;
-      renderWeekSelect();
-      renderGrid();
-      renderEditor();
-      renderExport();
+      renderAfterScheduleChange();
     }
 
     function renderWeekSelect() {
       weekSelect.innerHTML = "";
       getSelectableWeekKeys().forEach((weekKey) => {
+        const week = state.weeks[weekKey];
         const option = document.createElement("option");
         option.value = weekKey;
-        option.textContent = formatWeekLabel(weekKey);
+        option.textContent = week
+          ? `${formatWeekLabel(weekKey)} · ${getWeekTypeLabel(week.type)}`
+          : formatWeekLabel(weekKey);
         option.selected = weekKey === state.selectedWeek;
         weekSelect.append(option);
       });
@@ -1083,10 +1511,7 @@
       state.selectedWeek = weekKey;
       copyToast.textContent = "";
       saveData();
-      renderWeekSelect();
-      renderGrid();
-      renderEditor();
-      renderExport();
+      renderAfterScheduleChange();
     }
 
     function shiftWeek(direction) {
@@ -1103,6 +1528,8 @@
         try {
           await setRemoteDoc(remotePlanRef, {
             weeks: state.weeks,
+            templates: state.templates,
+            activeTemplateId: state.activeTemplateId,
             updatedAt: remoteServerTimestamp()
           }, { merge: true });
           setSyncStatus("Online gespeichert");
@@ -1127,8 +1554,7 @@
 
         firestoreModule.onSnapshot(remotePlanRef, (snapshot) => {
           if (snapshot.exists()) {
-            const data = snapshot.data();
-            applyRemoteWeeks(data.weeks || createEmptyWeeks(state.selectedWeek, data.notes || {}));
+            applyRemoteData(snapshot.data());
             setSyncStatus("Online synchron");
           } else {
             setSyncStatus("Online bereit");
@@ -1214,7 +1640,7 @@
     }
 
     function getLesson(id) {
-      return lessons.find((lesson) => lesson.id === id);
+      return getActiveLessons().find((lesson) => lesson.id === id);
     }
 
     function getEntry(id) {
@@ -1253,11 +1679,12 @@
     }
 
     function expandTeacherNames(value) {
-      return String(value)
+      const names = String(value)
         .split(/\s+/)
         .filter(Boolean)
         .map((part) => teacherNames[part] || part)
-        .join(" ");
+      if (names.length <= 2) return names.join(" und ");
+      return `${names.slice(0, -1).join(", ")} und ${names.at(-1)}`;
     }
 
     function hourLabel(lesson) {
@@ -1309,7 +1736,7 @@
         }
       });
 
-      lessons.forEach((lesson) => {
+      getActiveLessons().forEach((lesson) => {
         const entry = getEntry(lesson.id);
         const button = document.createElement("button");
         const col = visibleDays.findIndex((day) => day.id === lesson.day);
@@ -1412,7 +1839,7 @@
     }
 
     function exportForDay(dayId) {
-      return lessons
+      return getActiveLessons()
         .filter((lesson) => lesson.day === dayId)
         .sort((a, b) => a.start - b.start)
         .map((lesson) => {
@@ -1465,6 +1892,303 @@
       }
     }
 
+    function getWeekTypeOptions(selectedType) {
+      return Object.entries(weekTypes)
+        .map(([value, label]) => `<option value="${value}" ${value === selectedType ? "selected" : ""}>${label}</option>`)
+        .join("");
+    }
+
+    function getTemplateOptions(selectedTemplateId) {
+      return state.templates
+        .map((template) => `<option value="${escapeHtml(template.id)}" ${template.id === selectedTemplateId ? "selected" : ""}>${escapeHtml(template.name)} · ${escapeHtml(getWeekTypeLabel(template.type))}</option>`)
+        .join("");
+    }
+
+    function getDayOptions(selectedDay) {
+      return days
+        .map((day) => `<option value="${day.id}" ${day.id === selectedDay ? "selected" : ""}>${day.short}</option>`)
+        .join("");
+    }
+
+    function getHourOptions(selectedHour) {
+      return hours
+        .map((hour) => `<option value="${hour.nr}" ${hour.nr === Number(selectedHour) ? "selected" : ""}>${hour.nr}.</option>`)
+        .join("");
+    }
+
+    function makeTemplateId() {
+      return `tpl-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    }
+
+    function makeLessonId(lesson) {
+      return `${lesson.day}-${lesson.start}-${lesson.end}-${String(lesson.subject || "fach").toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now().toString(36)}`;
+    }
+
+    function getSortedLessons(template) {
+      return [...(template?.lessons || [])].sort((a, b) => (
+        days.findIndex((day) => day.id === a.day) - days.findIndex((day) => day.id === b.day)
+        || a.start - b.start
+        || a.end - b.end
+      ));
+    }
+
+    function refreshAfterSettingsChange(weekKey = state.selectedWeek) {
+      saveData();
+      if (weekKey === state.selectedWeek) {
+        renderAfterScheduleChange();
+        return;
+      }
+      renderWeekSelect();
+      renderSettings();
+    }
+
+    function setWeekType(weekKey, type) {
+      ensureWeek(weekKey);
+      const week = getWeekData(weekKey);
+      week.type = weekTypes[type] ? type : "berufsschule";
+      const currentTemplate = getTemplateById(week.templateId);
+      if (!currentTemplate || currentTemplate.type !== week.type) {
+        week.templateId = getExistingTemplateId(getDefaultTemplateIdForType(week.type));
+      }
+      refreshAfterSettingsChange(weekKey);
+    }
+
+    function applyTemplateToWeek(weekKey, templateId) {
+      const template = getTemplateById(templateId);
+      if (!template) return;
+      ensureWeek(weekKey);
+      const week = getWeekData(weekKey);
+      week.templateId = template.id;
+      week.type = template.type;
+      refreshAfterSettingsChange(weekKey);
+    }
+
+    function selectTemplate(templateId) {
+      state.activeTemplateId = getExistingTemplateId(templateId);
+      saveData();
+      renderSettings();
+    }
+
+    function createTemplateFromActive() {
+      const source = getTemplateById(state.activeTemplateId) || getActiveTemplate() || state.templates[0];
+      const template = {
+        id: makeTemplateId(),
+        name: `${source.name} Kopie`,
+        type: source.type,
+        lessons: cloneLessons(source.lessons)
+      };
+      state.templates.push(template);
+      state.activeTemplateId = template.id;
+      saveData();
+      renderAfterScheduleChange();
+    }
+
+    function deleteActiveTemplate() {
+      const template = getTemplateById(state.activeTemplateId);
+      if (!template || defaultTemplates.some((item) => item.id === template.id)) return;
+      state.templates = state.templates.filter((item) => item.id !== template.id);
+      Object.values(state.weeks).forEach((week) => {
+        if (week.templateId === template.id) {
+          week.templateId = getDefaultTemplateIdForType(week.type);
+        }
+      });
+      state.activeTemplateId = getExistingTemplateId(getDefaultTemplateIdForType(template.type));
+      saveData();
+      renderAfterScheduleChange();
+    }
+
+    function updateActiveTemplateMeta(field, value) {
+      const template = getTemplateById(state.activeTemplateId);
+      if (!template) return;
+      if (field === "type") {
+        template.type = weekTypes[value] ? value : template.type;
+        Object.values(state.weeks).forEach((week) => {
+          if (week.templateId === template.id) week.type = template.type;
+        });
+      } else {
+        template[field] = value.trim() || "Stundenplan";
+      }
+      saveData();
+      renderAfterScheduleChange();
+    }
+
+    function updateLessonField(lessonId, field, value) {
+      const template = getTemplateById(state.activeTemplateId);
+      if (!template) return;
+      const lesson = template.lessons.find((item) => item.id === lessonId);
+      if (!lesson) return;
+
+      if (field === "start" || field === "end") {
+        lesson[field] = Number(value);
+        if (lesson.end < lesson.start) lesson.end = lesson.start;
+      } else {
+        lesson[field] = value.trim();
+      }
+
+      saveData();
+      renderAfterScheduleChange();
+    }
+
+    function addLessonToActiveTemplate() {
+      const template = getTemplateById(state.activeTemplateId);
+      if (!template) return;
+      const lesson = {
+        id: makeLessonId({ day: "mo", start: 1, end: 1, subject: "Fach" }),
+        day: "mo",
+        start: 1,
+        end: 1,
+        subject: "Fach",
+        teacher: "",
+        room: ""
+      };
+      template.lessons.push(lesson);
+      saveData();
+      renderAfterScheduleChange();
+    }
+
+    function removeLessonFromActiveTemplate(lessonId) {
+      const template = getTemplateById(state.activeTemplateId);
+      if (!template) return;
+      template.lessons = template.lessons.filter((lesson) => lesson.id !== lessonId);
+      saveData();
+      renderAfterScheduleChange();
+    }
+
+    function renderWeekSettings() {
+      weekSettingsList.innerHTML = "";
+      getSelectableWeekKeys().forEach((weekKey) => {
+        const week = state.weeks[weekKey] || createWeekData();
+        const template = getTemplateById(week.templateId) || getTemplateById(getDefaultTemplateIdForType(week.type));
+        const row = document.createElement("div");
+        row.className = `week-plan-row${weekKey === state.selectedWeek ? " is-current" : ""}`;
+        row.dataset.weekKey = weekKey;
+        row.innerHTML = `
+          <div class="week-plan-label">
+            <span class="week-plan-title">${escapeHtml(formatWeekLabel(weekKey))}</span>
+            <span class="week-plan-subtitle">${escapeHtml(template?.name || "Keine Vorlage")}</span>
+          </div>
+          <select class="settings-select week-type-select" data-week-key="${escapeHtml(weekKey)}" aria-label="Wochentyp">
+            ${getWeekTypeOptions(week.type)}
+          </select>
+          <select class="settings-select week-template-select" data-week-key="${escapeHtml(weekKey)}" aria-label="Vorlage">
+            ${getTemplateOptions(template?.id)}
+          </select>
+        `;
+        row.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          row.classList.add("is-drop-target");
+        });
+        row.addEventListener("dragleave", () => row.classList.remove("is-drop-target"));
+        row.addEventListener("drop", (event) => {
+          event.preventDefault();
+          row.classList.remove("is-drop-target");
+          applyTemplateToWeek(weekKey, event.dataTransfer.getData("text/plain"));
+        });
+        weekSettingsList.append(row);
+      });
+
+      weekSettingsList.querySelectorAll(".week-type-select").forEach((select) => {
+        select.addEventListener("change", () => setWeekType(select.dataset.weekKey, select.value));
+      });
+      weekSettingsList.querySelectorAll(".week-template-select").forEach((select) => {
+        select.addEventListener("change", () => applyTemplateToWeek(select.dataset.weekKey, select.value));
+      });
+    }
+
+    function renderTemplateList() {
+      templateList.innerHTML = "";
+      state.templates.forEach((template) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.draggable = true;
+        card.className = `template-card${template.id === state.activeTemplateId ? " is-selected" : ""}`;
+        card.dataset.templateId = template.id;
+        card.innerHTML = `
+          <span class="template-card-title">${escapeHtml(template.name)}</span>
+          <span class="template-card-meta">${escapeHtml(getWeekTypeLabel(template.type))} · ${template.lessons.length} Stunden</span>
+        `;
+        card.addEventListener("click", () => selectTemplate(template.id));
+        card.addEventListener("dragstart", (event) => {
+          event.dataTransfer.setData("text/plain", template.id);
+          event.dataTransfer.effectAllowed = "copy";
+        });
+        templateList.append(card);
+      });
+    }
+
+    function renderTemplateEditor() {
+      const template = getTemplateById(state.activeTemplateId) || state.templates[0];
+      state.activeTemplateId = template.id;
+      const canDelete = !defaultTemplates.some((item) => item.id === template.id);
+      const lessonsHtml = getSortedLessons(template).map((lesson) => `
+        <div class="lesson-edit-row" data-lesson-id="${escapeHtml(lesson.id)}">
+          <select class="settings-select lesson-field" data-lesson-id="${escapeHtml(lesson.id)}" data-field="day" aria-label="Tag">
+            ${getDayOptions(lesson.day)}
+          </select>
+          <select class="settings-select lesson-field" data-lesson-id="${escapeHtml(lesson.id)}" data-field="start" aria-label="Startstunde">
+            ${getHourOptions(lesson.start)}
+          </select>
+          <select class="settings-select lesson-field" data-lesson-id="${escapeHtml(lesson.id)}" data-field="end" aria-label="Endstunde">
+            ${getHourOptions(lesson.end)}
+          </select>
+          <input class="settings-input lesson-field" data-lesson-id="${escapeHtml(lesson.id)}" data-field="subject" value="${escapeHtml(lesson.subject)}" aria-label="Fach">
+          <input class="settings-input lesson-field" data-lesson-id="${escapeHtml(lesson.id)}" data-field="teacher" value="${escapeHtml(lesson.teacher)}" aria-label="Lehrer">
+          <input class="settings-input lesson-field" data-lesson-id="${escapeHtml(lesson.id)}" data-field="room" value="${escapeHtml(lesson.room)}" aria-label="Raum">
+          <button class="lesson-remove" type="button" data-remove-lesson="${escapeHtml(lesson.id)}" aria-label="Stunde löschen">×</button>
+        </div>
+      `).join("");
+
+      templateEditor.innerHTML = `
+        <div class="template-editor-head">
+          <h3>${escapeHtml(template.name)}</h3>
+        </div>
+        <div class="template-form-grid">
+          <input class="settings-input template-field" data-field="name" value="${escapeHtml(template.name)}" aria-label="Vorlagenname">
+          <select class="settings-select template-field" data-field="type" aria-label="Vorlagentyp">
+            ${getWeekTypeOptions(template.type)}
+          </select>
+        </div>
+        <div class="lesson-editor-list">
+          ${lessonsHtml || '<div class="empty-state">Diese Vorlage hat noch keine Stunden. Füge unten eine Stunde hinzu.</div>'}
+        </div>
+        <div class="settings-actions">
+          <button class="btn primary" id="addLessonBtn" type="button">Stunde hinzufügen</button>
+          <button class="btn ghost" id="duplicateTemplateBtn" type="button">Duplizieren</button>
+          <button class="btn ghost" id="deleteTemplateBtn" type="button" ${canDelete ? "" : "disabled"}>Vorlage löschen</button>
+        </div>
+      `;
+
+      templateEditor.querySelectorAll(".template-field").forEach((field) => {
+        field.addEventListener("change", () => updateActiveTemplateMeta(field.dataset.field, field.value));
+      });
+      templateEditor.querySelectorAll(".lesson-field").forEach((field) => {
+        field.addEventListener("change", () => updateLessonField(field.dataset.lessonId, field.dataset.field, field.value));
+      });
+      templateEditor.querySelectorAll("[data-remove-lesson]").forEach((button) => {
+        button.addEventListener("click", () => removeLessonFromActiveTemplate(button.dataset.removeLesson));
+      });
+      templateEditor.querySelector("#addLessonBtn").addEventListener("click", addLessonToActiveTemplate);
+      templateEditor.querySelector("#duplicateTemplateBtn").addEventListener("click", createTemplateFromActive);
+      templateEditor.querySelector("#deleteTemplateBtn").addEventListener("click", deleteActiveTemplate);
+    }
+
+    function renderSettings() {
+      if (settingsModal.hidden) return;
+      renderWeekSettings();
+      renderTemplateList();
+      renderTemplateEditor();
+    }
+
+    function openSettings() {
+      state.activeTemplateId = getActiveTemplate()?.id || getExistingTemplateId(state.activeTemplateId);
+      settingsModal.hidden = false;
+      renderSettings();
+    }
+
+    function closeSettings() {
+      settingsModal.hidden = true;
+    }
+
     function showIntroIfNeeded() {
       if (localStorage.getItem(INTRO_KEY)) return;
       introModal.hidden = false;
@@ -1480,6 +2204,13 @@
     prevWeekBtn.addEventListener("click", () => shiftWeek(-1));
     nextWeekBtn.addEventListener("click", () => shiftWeek(1));
 
+    settingsBtn.addEventListener("click", openSettings);
+    settingsCloseBtn.addEventListener("click", closeSettings);
+    newTemplateBtn.addEventListener("click", createTemplateFromActive);
+    settingsModal.addEventListener("click", (event) => {
+      if (event.target === settingsModal) closeSettings();
+    });
+
     introCloseBtn.addEventListener("click", closeIntro);
     introModal.addEventListener("click", (event) => {
       if (event.target === introModal) closeIntro();
@@ -1487,6 +2218,7 @@
 
     window.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !introModal.hidden) closeIntro();
+      if (event.key === "Escape" && !settingsModal.hidden) closeSettings();
     });
 
     copyDayBtn.addEventListener("click", async () => {
