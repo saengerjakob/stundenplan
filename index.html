@@ -1134,16 +1134,6 @@
           <p class="settings-hint">Ein Klick reicht. Die Woche übernimmt automatisch den passenden Standardplan.</p>
           <div class="week-settings-list" id="weekSettingsList"></div>
         </section>
-        <section class="settings-section" aria-label="Standardpläne bearbeiten">
-          <div class="template-toolbar">
-            <div>
-              <h3>Standardpläne bearbeiten</h3>
-              <p class="settings-hint">Wähle Berufsschule oder MAK und passe darunter einzelne Stunden an.</p>
-            </div>
-          </div>
-          <div class="template-list" id="templateList"></div>
-          <div class="template-editor" id="templateEditor"></div>
-        </section>
       </div>
     </section>
   </div>
@@ -1297,8 +1287,6 @@
     const settingsModal = document.querySelector("#settingsModal");
     const settingsCloseBtn = document.querySelector("#settingsCloseBtn");
     const weekSettingsList = document.querySelector("#weekSettingsList");
-    const templateList = document.querySelector("#templateList");
-    const templateEditor = document.querySelector("#templateEditor");
 
     let remotePlanRef = null;
     let setRemoteDoc = null;
@@ -1421,35 +1409,13 @@
       return (lessons || []).map((lesson) => ({ ...lesson }));
     }
 
-    function normalizeTemplates(templates = defaultTemplates) {
-      const source = Array.isArray(templates) && templates.length ? templates : defaultTemplates;
-      const normalized = source
-        .filter((template) => template && template.id)
-        .map((template) => ({
-          id: String(template.id),
-          name: template.name || "Stundenplan",
-          type: weekTypes[template.type] ? template.type : "berufsschule",
-          lessons: cloneLessons(template.lessons)
-        }));
-
-      defaultTemplates.forEach((template) => {
-        const existing = normalized.find((item) => item.id === template.id);
-        if (existing && !existing.lessons.length && template.lessons.length) {
-          existing.name = template.name;
-          existing.type = template.type;
-          existing.lessons = cloneLessons(template.lessons);
-        }
-        if (!existing) {
-          normalized.push({
-            id: template.id,
-            name: template.name,
-            type: template.type,
-            lessons: cloneLessons(template.lessons)
-          });
-        }
-      });
-
-      return normalized;
+    function normalizeTemplates() {
+      return defaultTemplates.map((template) => ({
+        id: template.id,
+        name: template.name,
+        type: template.type,
+        lessons: cloneLessons(template.lessons)
+      }));
     }
 
     function getExistingTemplateId(templateId, templates = state.templates) {
@@ -1462,12 +1428,12 @@
       return DEFAULT_TEMPLATE_ID;
     }
 
-    function createWeekData(notes = {}, type = "berufsschule", templateId = getDefaultTemplateIdForType(type)) {
+    function createWeekData(notes = {}, type = "berufsschule") {
       const safeType = weekTypes[type] ? type : "berufsschule";
       return {
         notes: notes || {},
         type: safeType,
-        templateId: templateId || getDefaultTemplateIdForType(safeType)
+        templateId: getDefaultTemplateIdForType(safeType)
       };
     }
 
@@ -1476,8 +1442,7 @@
         key,
         createWeekData(
           value && value.notes ? value.notes : {},
-          value && value.type ? value.type : "berufsschule",
-          value && value.templateId ? value.templateId : undefined
+          value && value.type ? value.type : "berufsschule"
         )
       ]));
     }
@@ -1490,9 +1455,7 @@
       if (!state.weeks[weekKey]) {
         state.weeks[weekKey] = createWeekData();
       }
-      if (!getTemplateById(state.weeks[weekKey].templateId)) {
-        state.weeks[weekKey].templateId = getDefaultTemplateIdForType(state.weeks[weekKey].type);
-      }
+      state.weeks[weekKey].templateId = getDefaultTemplateIdForType(state.weeks[weekKey].type);
       return state.weeks[weekKey];
     }
 
@@ -2150,75 +2113,12 @@
       });
     }
 
-    function renderTemplateList() {
-      templateList.innerHTML = "";
-      [DEFAULT_TEMPLATE_ID, DEFAULT_MAK_TEMPLATE_ID].forEach((templateId) => {
-        const template = getTemplateById(templateId);
-        if (!template) return;
-        const card = document.createElement("button");
-        card.type = "button";
-        card.className = `template-card${template.id === state.activeTemplateId ? " is-selected" : ""}`;
-        card.dataset.templateId = template.id;
-        card.innerHTML = `
-          <span class="template-card-title">${escapeHtml(getWeekTypeLabel(template.type))}</span>
-          <span class="template-card-meta">${template.lessons.length} Stunden</span>
-        `;
-        card.addEventListener("click", () => selectTemplate(template.id));
-        templateList.append(card);
-      });
-    }
-
-    function renderTemplateEditor() {
-      const template = getTemplateById(state.activeTemplateId) || state.templates[0];
-      state.activeTemplateId = template.id;
-      const lessonsHtml = getSortedLessons(template).map((lesson) => `
-        <div class="lesson-edit-row" data-lesson-id="${escapeHtml(lesson.id)}">
-          <select class="settings-select lesson-field" data-lesson-id="${escapeHtml(lesson.id)}" data-field="day" aria-label="Tag">
-            ${getDayOptions(lesson.day)}
-          </select>
-          <select class="settings-select lesson-field" data-lesson-id="${escapeHtml(lesson.id)}" data-field="start" aria-label="Startstunde">
-            ${getHourOptions(lesson.start)}
-          </select>
-          <select class="settings-select lesson-field" data-lesson-id="${escapeHtml(lesson.id)}" data-field="end" aria-label="Endstunde">
-            ${getHourOptions(lesson.end)}
-          </select>
-          <input class="settings-input lesson-field" data-lesson-id="${escapeHtml(lesson.id)}" data-field="subject" value="${escapeHtml(lesson.subject)}" aria-label="Fach">
-          <input class="settings-input lesson-field" data-lesson-id="${escapeHtml(lesson.id)}" data-field="teacher" value="${escapeHtml(lesson.teacher)}" aria-label="Lehrer">
-          <input class="settings-input lesson-field" data-lesson-id="${escapeHtml(lesson.id)}" data-field="room" value="${escapeHtml(lesson.room)}" aria-label="Raum">
-          <button class="lesson-remove" type="button" data-remove-lesson="${escapeHtml(lesson.id)}" aria-label="Stunde löschen">×</button>
-        </div>
-      `).join("");
-
-      templateEditor.innerHTML = `
-        <div class="template-editor-head">
-          <h3>${escapeHtml(getWeekTypeLabel(template.type))} bearbeiten</h3>
-        </div>
-        <div class="lesson-editor-list">
-          ${lessonsHtml || '<div class="empty-state">Diese Vorlage hat noch keine Stunden. Füge unten eine Stunde hinzu.</div>'}
-        </div>
-        <div class="settings-actions">
-          <button class="btn primary" id="addLessonBtn" type="button">Stunde hinzufügen</button>
-        </div>
-      `;
-
-      templateEditor.querySelectorAll(".lesson-field").forEach((field) => {
-        field.addEventListener("change", () => updateLessonField(field.dataset.lessonId, field.dataset.field, field.value));
-      });
-      templateEditor.querySelectorAll("[data-remove-lesson]").forEach((button) => {
-        button.addEventListener("click", () => removeLessonFromActiveTemplate(button.dataset.removeLesson));
-      });
-      templateEditor.querySelector("#addLessonBtn").addEventListener("click", addLessonToActiveTemplate);
-    }
-
     function renderSettings() {
       if (settingsModal.hidden) return;
       renderWeekSettings();
-      renderTemplateList();
-      renderTemplateEditor();
     }
 
     function openSettings() {
-      state.activeTemplateId = getDefaultTemplateIdForType(getActiveWeekData().type);
       settingsModal.hidden = false;
       renderSettings();
     }
