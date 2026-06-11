@@ -703,11 +703,6 @@
       border-color: var(--green);
     }
 
-    .week-plan-row.is-drop-target {
-      border-color: var(--orange);
-      background: #241914;
-    }
-
     .week-plan-label {
       display: grid;
       gap: 3px;
@@ -810,6 +805,63 @@
       flex-wrap: wrap;
       gap: 8px;
       margin-top: 12px;
+    }
+
+    .settings-modal {
+      width: min(900px, 100%);
+    }
+
+    .settings-grid {
+      grid-template-columns: 1fr;
+      overflow: auto;
+    }
+
+    .settings-section + .settings-section {
+      border-left: 0;
+      border-top: 1px solid #283238;
+    }
+
+    .week-plan-row {
+      grid-template-columns: minmax(160px, 1fr) auto;
+    }
+
+    .week-type-buttons,
+    .plan-switch {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .type-choice {
+      min-height: 34px;
+      border: 1px solid #334047;
+      border-radius: var(--radius);
+      padding: 0 10px;
+      background: #20272c;
+      color: #d9e2e7;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .type-choice.is-selected {
+      border-color: var(--green);
+      background: var(--green);
+      color: #082117;
+    }
+
+    .template-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-bottom: 14px;
+    }
+
+    .template-editor-head h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .template-form-grid {
+      display: none;
     }
 
     @media (max-width: 1280px) {
@@ -1072,23 +1124,22 @@
       <div class="settings-head">
         <div>
           <h2 id="settingsTitle">Einstellungen</h2>
-          <p class="settings-hint">Plane Wochen als Berufsschule oder MAK und ziehe Stundenplan-Versionen auf die passenden Wochen.</p>
+          <p class="settings-hint">Wähle pro Woche einfach aus, ob dort Berufsschule oder MAK ist.</p>
         </div>
         <button class="icon-btn" id="settingsCloseBtn" type="button" aria-label="Einstellungen schließen">×</button>
       </div>
       <div class="settings-grid">
         <section class="settings-section" aria-label="Wochen planen">
           <h3>Wochen planen</h3>
-          <p class="settings-hint">Vorlage greifen und auf eine Woche ziehen. Am Handy kannst du die Dropdowns nutzen.</p>
+          <p class="settings-hint">Ein Klick reicht. Die Woche übernimmt automatisch den passenden Standardplan.</p>
           <div class="week-settings-list" id="weekSettingsList"></div>
         </section>
-        <section class="settings-section" aria-label="Stundenplan-Versionen">
+        <section class="settings-section" aria-label="Standardpläne bearbeiten">
           <div class="template-toolbar">
             <div>
-              <h3>Stundenplan-Versionen</h3>
-              <p class="settings-hint">Bearbeitete Vorlagen werden dauerhaft gespeichert und online synchronisiert.</p>
+              <h3>Standardpläne bearbeiten</h3>
+              <p class="settings-hint">Wähle Berufsschule oder MAK und passe darunter einzelne Stunden an.</p>
             </div>
-            <button class="btn primary" id="newTemplateBtn" type="button">Neue Version</button>
           </div>
           <div class="template-list" id="templateList"></div>
           <div class="template-editor" id="templateEditor"></div>
@@ -1178,6 +1229,22 @@
       { id: "mo-9-10-bta", day: "mo", start: 9, end: 10, subject: "BTA", teacher: "Hai", room: "r313", tone: "orange" }
     ];
 
+    const makLessons = [
+      { id: "mak-fr-1-bta-tom", day: "fr", start: 1, end: 1, subject: "BTA", teacher: "Tom", room: "mak2", tone: "light" },
+      { id: "mak-mo-2-4-bta-blm", day: "mo", start: 2, end: 4, subject: "BTA", teacher: "Blm", room: "mak2", tone: "light" },
+      { id: "mak-di-2-6-bta-mll", day: "di", start: 2, end: 6, subject: "BTA", teacher: "Mll", room: "mak2", tone: "light" },
+      { id: "mak-mi-2-6-bta-tom", day: "mi", start: 2, end: 6, subject: "BTA", teacher: "Tom", room: "mak2", tone: "light" },
+      { id: "mak-do-2-6-bta-tom", day: "do", start: 2, end: 6, subject: "BTA", teacher: "Tom", room: "mak2", tone: "light" },
+      { id: "mak-fr-2-6-bta-batz", day: "fr", start: 2, end: 6, subject: "BTA", teacher: "Batz MA...", room: "mak2", tone: "light" },
+      { id: "mak-mo-5-6-bta-mll", day: "mo", start: 5, end: 6, subject: "BTA", teacher: "Mll", room: "mak2", tone: "light" },
+      { id: "mak-di-7-10-bta-tom", day: "di", start: 7, end: 10, subject: "BTA", teacher: "Tom", room: "mak2", tone: "light" },
+      { id: "mak-mi-7-10-bta-tom", day: "mi", start: 7, end: 10, subject: "BTA", teacher: "Tom", room: "mak2", tone: "light" },
+      { id: "mak-do-7-10-bta-batz-mll", day: "do", start: 7, end: 10, subject: "BTA", teacher: "Batz Mll ...", room: "mak2", tone: "light" },
+      { id: "mak-fr-7-8-bta-batz", day: "fr", start: 7, end: 8, subject: "BTA", teacher: "Batz MA...", room: "mak2", tone: "light" },
+      { id: "mak-mo-8-11-bta-mll", day: "mo", start: 8, end: 11, subject: "BTA", teacher: "Mll", room: "mak2", tone: "light" },
+      { id: "mak-fr-9-bta-tom", day: "fr", start: 9, end: 9, subject: "BTA", teacher: "Tom", room: "mak2", tone: "light" }
+    ];
+
     const defaultTemplates = [
       {
         id: DEFAULT_TEMPLATE_ID,
@@ -1189,7 +1256,7 @@
         id: DEFAULT_MAK_TEMPLATE_ID,
         name: "MAK Standard",
         type: "mak",
-        lessons: []
+        lessons: makLessons
       }
     ];
 
@@ -1232,7 +1299,6 @@
     const weekSettingsList = document.querySelector("#weekSettingsList");
     const templateList = document.querySelector("#templateList");
     const templateEditor = document.querySelector("#templateEditor");
-    const newTemplateBtn = document.querySelector("#newTemplateBtn");
 
     let remotePlanRef = null;
     let setRemoteDoc = null;
@@ -1367,7 +1433,13 @@
         }));
 
       defaultTemplates.forEach((template) => {
-        if (!normalized.some((item) => item.id === template.id)) {
+        const existing = normalized.find((item) => item.id === template.id);
+        if (existing && !existing.lessons.length && template.lessons.length) {
+          existing.name = template.name;
+          existing.type = template.type;
+          existing.lessons = cloneLessons(template.lessons);
+        }
+        if (!existing) {
           normalized.push({
             id: template.id,
             name: template.name,
@@ -1946,10 +2018,7 @@
       ensureWeek(weekKey);
       const week = getWeekData(weekKey);
       week.type = weekTypes[type] ? type : "berufsschule";
-      const currentTemplate = getTemplateById(week.templateId);
-      if (!currentTemplate || currentTemplate.type !== week.type) {
-        week.templateId = getExistingTemplateId(getDefaultTemplateIdForType(week.type));
-      }
+      week.templateId = getExistingTemplateId(getDefaultTemplateIdForType(week.type));
       refreshAfterSettingsChange(weekKey);
     }
 
@@ -2067,51 +2136,34 @@
             <span class="week-plan-title">${escapeHtml(formatWeekLabel(weekKey))}</span>
             <span class="week-plan-subtitle">${escapeHtml(template?.name || "Keine Vorlage")}</span>
           </div>
-          <select class="settings-select week-type-select" data-week-key="${escapeHtml(weekKey)}" aria-label="Wochentyp">
-            ${getWeekTypeOptions(week.type)}
-          </select>
-          <select class="settings-select week-template-select" data-week-key="${escapeHtml(weekKey)}" aria-label="Vorlage">
-            ${getTemplateOptions(template?.id)}
-          </select>
+          <div class="week-type-buttons" aria-label="Wochentyp">
+            ${Object.entries(weekTypes).map(([type, label]) => `
+              <button class="type-choice${week.type === type ? " is-selected" : ""}" type="button" data-week-key="${escapeHtml(weekKey)}" data-week-type="${escapeHtml(type)}">${escapeHtml(label)}</button>
+            `).join("")}
+          </div>
         `;
-        row.addEventListener("dragover", (event) => {
-          event.preventDefault();
-          row.classList.add("is-drop-target");
-        });
-        row.addEventListener("dragleave", () => row.classList.remove("is-drop-target"));
-        row.addEventListener("drop", (event) => {
-          event.preventDefault();
-          row.classList.remove("is-drop-target");
-          applyTemplateToWeek(weekKey, event.dataTransfer.getData("text/plain"));
-        });
         weekSettingsList.append(row);
       });
 
-      weekSettingsList.querySelectorAll(".week-type-select").forEach((select) => {
-        select.addEventListener("change", () => setWeekType(select.dataset.weekKey, select.value));
-      });
-      weekSettingsList.querySelectorAll(".week-template-select").forEach((select) => {
-        select.addEventListener("change", () => applyTemplateToWeek(select.dataset.weekKey, select.value));
+      weekSettingsList.querySelectorAll(".type-choice").forEach((button) => {
+        button.addEventListener("click", () => setWeekType(button.dataset.weekKey, button.dataset.weekType));
       });
     }
 
     function renderTemplateList() {
       templateList.innerHTML = "";
-      state.templates.forEach((template) => {
+      [DEFAULT_TEMPLATE_ID, DEFAULT_MAK_TEMPLATE_ID].forEach((templateId) => {
+        const template = getTemplateById(templateId);
+        if (!template) return;
         const card = document.createElement("button");
         card.type = "button";
-        card.draggable = true;
         card.className = `template-card${template.id === state.activeTemplateId ? " is-selected" : ""}`;
         card.dataset.templateId = template.id;
         card.innerHTML = `
-          <span class="template-card-title">${escapeHtml(template.name)}</span>
-          <span class="template-card-meta">${escapeHtml(getWeekTypeLabel(template.type))} · ${template.lessons.length} Stunden</span>
+          <span class="template-card-title">${escapeHtml(getWeekTypeLabel(template.type))}</span>
+          <span class="template-card-meta">${template.lessons.length} Stunden</span>
         `;
         card.addEventListener("click", () => selectTemplate(template.id));
-        card.addEventListener("dragstart", (event) => {
-          event.dataTransfer.setData("text/plain", template.id);
-          event.dataTransfer.effectAllowed = "copy";
-        });
         templateList.append(card);
       });
     }
@@ -2119,7 +2171,6 @@
     function renderTemplateEditor() {
       const template = getTemplateById(state.activeTemplateId) || state.templates[0];
       state.activeTemplateId = template.id;
-      const canDelete = !defaultTemplates.some((item) => item.id === template.id);
       const lessonsHtml = getSortedLessons(template).map((lesson) => `
         <div class="lesson-edit-row" data-lesson-id="${escapeHtml(lesson.id)}">
           <select class="settings-select lesson-field" data-lesson-id="${escapeHtml(lesson.id)}" data-field="day" aria-label="Tag">
@@ -2140,27 +2191,16 @@
 
       templateEditor.innerHTML = `
         <div class="template-editor-head">
-          <h3>${escapeHtml(template.name)}</h3>
-        </div>
-        <div class="template-form-grid">
-          <input class="settings-input template-field" data-field="name" value="${escapeHtml(template.name)}" aria-label="Vorlagenname">
-          <select class="settings-select template-field" data-field="type" aria-label="Vorlagentyp">
-            ${getWeekTypeOptions(template.type)}
-          </select>
+          <h3>${escapeHtml(getWeekTypeLabel(template.type))} bearbeiten</h3>
         </div>
         <div class="lesson-editor-list">
           ${lessonsHtml || '<div class="empty-state">Diese Vorlage hat noch keine Stunden. Füge unten eine Stunde hinzu.</div>'}
         </div>
         <div class="settings-actions">
           <button class="btn primary" id="addLessonBtn" type="button">Stunde hinzufügen</button>
-          <button class="btn ghost" id="duplicateTemplateBtn" type="button">Duplizieren</button>
-          <button class="btn ghost" id="deleteTemplateBtn" type="button" ${canDelete ? "" : "disabled"}>Vorlage löschen</button>
         </div>
       `;
 
-      templateEditor.querySelectorAll(".template-field").forEach((field) => {
-        field.addEventListener("change", () => updateActiveTemplateMeta(field.dataset.field, field.value));
-      });
       templateEditor.querySelectorAll(".lesson-field").forEach((field) => {
         field.addEventListener("change", () => updateLessonField(field.dataset.lessonId, field.dataset.field, field.value));
       });
@@ -2168,8 +2208,6 @@
         button.addEventListener("click", () => removeLessonFromActiveTemplate(button.dataset.removeLesson));
       });
       templateEditor.querySelector("#addLessonBtn").addEventListener("click", addLessonToActiveTemplate);
-      templateEditor.querySelector("#duplicateTemplateBtn").addEventListener("click", createTemplateFromActive);
-      templateEditor.querySelector("#deleteTemplateBtn").addEventListener("click", deleteActiveTemplate);
     }
 
     function renderSettings() {
@@ -2180,7 +2218,7 @@
     }
 
     function openSettings() {
-      state.activeTemplateId = getActiveTemplate()?.id || getExistingTemplateId(state.activeTemplateId);
+      state.activeTemplateId = getDefaultTemplateIdForType(getActiveWeekData().type);
       settingsModal.hidden = false;
       renderSettings();
     }
@@ -2206,7 +2244,6 @@
 
     settingsBtn.addEventListener("click", openSettings);
     settingsCloseBtn.addEventListener("click", closeSettings);
-    newTemplateBtn.addEventListener("click", createTemplateFromActive);
     settingsModal.addEventListener("click", (event) => {
       if (event.target === settingsModal) closeSettings();
     });
