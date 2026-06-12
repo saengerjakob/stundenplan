@@ -746,9 +746,56 @@
       gap: 8px;
     }
 
+    .calendar-sticky {
+      position: sticky;
+      top: 0;
+      z-index: 8;
+      margin: -18px -18px 14px;
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid #283238;
+      background: #121619;
+    }
+
+    .calendar-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .calendar-toolbar h3 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.15;
+      text-transform: capitalize;
+    }
+
+    .calendar-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .calendar-step {
+      width: 38px;
+      height: 34px;
+      border: 1px solid #334047;
+      border-radius: var(--radius);
+      background: #1a2024;
+      color: #e5eef2;
+      font-size: 26px;
+      line-height: 1;
+      display: grid;
+      place-items: center;
+    }
+
     .block-palette {
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      margin-bottom: 16px;
+      display: flex;
+      gap: 8px;
+      margin: 0;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: thin;
+      scrollbar-color: #4a565e #151719;
     }
 
     .block-chip,
@@ -766,6 +813,7 @@
     .block-chip {
       display: grid;
       gap: 4px;
+      min-width: 176px;
       padding: 10px;
       color: var(--text);
       text-align: left;
@@ -774,6 +822,20 @@
 
     .block-chip:active {
       cursor: grabbing;
+    }
+
+    .block-chip.is-selected {
+      border-color: var(--green);
+      background: #17231f;
+      box-shadow: 0 0 0 2px rgb(57 211 156 / 0.16);
+    }
+
+    .calendar-selection-text {
+      min-height: 20px;
+      margin-top: 8px;
+      color: var(--green);
+      font-size: 13px;
+      line-height: 1.35;
     }
 
     .block-chip-title,
@@ -792,38 +854,87 @@
       line-height: 1.35;
     }
 
+    .calendar-frame {
+      overflow: hidden;
+      border: 1px solid #303b42;
+      border-radius: 12px;
+      background: #111619;
+    }
+
+    .calendar-frame .week-settings-list {
+      gap: 0;
+    }
+
     .calendar-header,
     .week-plan-row {
       display: grid;
-      grid-template-columns: minmax(150px, 0.92fr) repeat(5, minmax(74px, 1fr)) minmax(118px, 0.8fr);
-      gap: 6px;
-      align-items: stretch;
+      grid-template-columns: 54px repeat(5, minmax(74px, 1fr));
+      gap: 0;
     }
 
     .calendar-header {
-      margin-bottom: 6px;
       color: var(--muted);
       font-size: 12px;
       font-weight: 750;
       text-align: center;
+      background: #151b1f;
+    }
+
+    .calendar-header span {
+      min-height: 34px;
+      display: grid;
+      place-items: center;
+      border-left: 1px solid #303b42;
     }
 
     .calendar-header span:first-child {
-      text-align: left;
+      border-left: 0;
     }
 
     .week-plan-row {
-      padding: 8px;
+      min-height: 126px;
+      padding: 0;
+      position: relative;
+      border: 0;
+      border-top: 1px solid #303b42;
+      border-radius: 0;
+      overflow: hidden;
+      cursor: pointer;
       transition: border-color 0.16s ease, background 0.16s ease;
     }
 
     .week-plan-row.is-current {
-      border-color: var(--green);
+      box-shadow: inset 0 0 0 2px rgb(57 211 156 / 0.56);
     }
 
     .week-plan-row.is-drop-target {
-      border-color: var(--green);
       background: #17231f;
+    }
+
+    .week-plan-row:hover {
+      background: #151d20;
+    }
+
+    .week-number-cell {
+      grid-column: 1;
+      grid-row: 1;
+      display: grid;
+      align-content: start;
+      justify-items: center;
+      padding-top: 10px;
+      border-right: 1px solid #303b42;
+      background: #14191d;
+    }
+
+    .week-number-badge {
+      min-width: 34px;
+      border-radius: 999px;
+      padding: 4px 7px;
+      background: #283239;
+      color: #d9e2e7;
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
     }
 
     .week-plan-label {
@@ -843,19 +954,20 @@
     }
 
     .week-day-cell {
-      min-height: 54px;
-      border: 1px solid #2a343a;
-      border-radius: var(--radius);
-      padding: 7px;
-      background: #111619;
+      min-height: 126px;
+      border: 0;
+      border-left: 1px solid #303b42;
+      border-radius: 0;
+      padding: 8px 8px 6px;
+      background: transparent;
       color: #dce5e9;
       display: grid;
-      align-content: center;
+      align-content: start;
       gap: 4px;
     }
 
     .week-day-cell.is-today {
-      border-color: var(--green);
+      background: rgb(57 211 156 / 0.08);
     }
 
     .week-day-name {
@@ -870,10 +982,47 @@
       font-weight: 750;
     }
 
-    .week-plan-actions {
-      display: grid;
-      gap: 6px;
-      align-content: center;
+    .week-day-cell.is-muted {
+      color: #7f8a91;
+    }
+
+    .week-block-pill {
+      grid-column: 2 / 7;
+      grid-row: 1;
+      align-self: end;
+      min-height: 30px;
+      margin: 48px 8px 0;
+      border-radius: 6px;
+      padding: 0 10px;
+      background: #6882d8;
+      color: #f1f5ff;
+      font-size: 13px;
+      font-weight: 750;
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      box-shadow: 0 8px 14px rgb(0 0 0 / 0.2);
+      z-index: 2;
+    }
+
+    .week-block-pill[data-block-type="mak"] {
+      background: #4da6d8;
+      color: #061923;
+    }
+
+    .week-block-pill.is-empty {
+      border: 1px dashed #3a464d;
+      background: rgb(255 255 255 / 0.04);
+      color: var(--muted);
+      box-shadow: none;
+    }
+
+    .week-clear-btn {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      z-index: 3;
     }
 
     .mini-btn {
@@ -1081,10 +1230,8 @@
         max-height: 96dvh;
       }
 
-      .week-plan-row,
       .lesson-edit-row,
       .teacher-row,
-      .calendar-header,
       .template-form-grid,
       .account-form-grid,
       .day-entry-form-grid,
@@ -1092,8 +1239,23 @@
         grid-template-columns: 1fr;
       }
 
-      .calendar-header {
-        display: none;
+      .calendar-sticky {
+        margin: -18px -18px 12px;
+      }
+
+      .calendar-header,
+      .week-plan-row {
+        grid-template-columns: 42px repeat(5, minmax(52px, 1fr));
+      }
+
+      .week-plan-row,
+      .week-day-cell {
+        min-height: 118px;
+      }
+
+      .week-block-pill {
+        margin-top: 46px;
+        font-size: 12px;
       }
 
       .lesson-remove,
@@ -1308,19 +1470,29 @@
       </div>
       <div class="settings-content">
         <section class="settings-panel is-active" id="settingsPanelCalendar" role="tabpanel" aria-labelledby="settingsTabCalendar" data-settings-panel="calendar">
-          <h3>Wochen planen</h3>
-          <p class="settings-hint">Ziehe einen gespeicherten Block auf eine Woche. Nicht belegte Wochen bleiben leer.</p>
-          <div class="block-palette" id="blockPalette"></div>
-          <div class="calendar-header" aria-hidden="true">
-            <span>Woche</span>
-            <span>Mo</span>
-            <span>Di</span>
-            <span>Mi</span>
-            <span>Do</span>
-            <span>Fr</span>
-            <span>Status</span>
+          <div class="calendar-sticky">
+            <div class="calendar-toolbar">
+              <h3 id="calendarMonthTitle">Kalender</h3>
+              <div class="calendar-actions" aria-label="Monat wechseln">
+                <button class="calendar-step" id="prevCalendarMonthBtn" type="button" aria-label="Vorheriger Monat">‹</button>
+                <button class="calendar-step" id="nextCalendarMonthBtn" type="button" aria-label="Nächster Monat">›</button>
+              </div>
+            </div>
+            <p class="settings-hint">Tippe eine Vorlage an und danach eine Woche. Drag and Drop geht zusätzlich.</p>
+            <div class="block-palette" id="blockPalette"></div>
+            <div class="calendar-selection-text" id="calendarSelectionText" aria-live="polite"></div>
           </div>
-          <div class="week-settings-list" id="weekSettingsList"></div>
+          <div class="calendar-frame">
+            <div class="calendar-header" aria-hidden="true">
+              <span>KW</span>
+              <span>M</span>
+              <span>D</span>
+              <span>M</span>
+              <span>D</span>
+              <span>F</span>
+            </div>
+            <div class="week-settings-list" id="weekSettingsList"></div>
+          </div>
         </section>
         <section class="settings-panel" id="settingsPanelBlocks" role="tabpanel" aria-labelledby="settingsTabBlocks" data-settings-panel="blocks">
           <div class="template-toolbar">
@@ -1489,6 +1661,8 @@
       accounts: savedData.accounts,
       currentUser: savedData.currentUser,
       settingsTab: "calendar",
+      calendarMonth: toMonthKey(parseWeekKey(savedData.selectedWeek)),
+      selectedCalendarTemplateId: "",
       selectedLessonId: null,
       scheduleDay: "mo",
       exportDay: "mo"
@@ -1521,6 +1695,10 @@
     const settingsCloseBtn = document.querySelector("#settingsCloseBtn");
     const settingsTabs = document.querySelectorAll(".settings-tab");
     const settingsPanels = document.querySelectorAll(".settings-panel");
+    const calendarMonthTitle = document.querySelector("#calendarMonthTitle");
+    const prevCalendarMonthBtn = document.querySelector("#prevCalendarMonthBtn");
+    const nextCalendarMonthBtn = document.querySelector("#nextCalendarMonthBtn");
+    const calendarSelectionText = document.querySelector("#calendarSelectionText");
     const blockPalette = document.querySelector("#blockPalette");
     const weekSettingsList = document.querySelector("#weekSettingsList");
     const templateList = document.querySelector("#templateList");
@@ -1621,6 +1799,18 @@
       return `${year}-${month}-${day}`;
     }
 
+    function toMonthKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      return `${year}-${month}`;
+    }
+
+    function parseMonthKey(monthKey) {
+      const [year, month] = String(monthKey).split("-").map(Number);
+      if (!year || !month) return new Date();
+      return new Date(year, month - 1, 1);
+    }
+
     function parseWeekKey(weekKey) {
       const [year, month, day] = String(weekKey).split("-").map(Number);
       if (!year || !month || !day) return getWeekStartDate();
@@ -1640,6 +1830,37 @@
       const end = addDays(start, 4);
       const suffix = weekKey === getCurrentWeekKey() ? "Diese Woche - " : "";
       return `${suffix}${formatShortDate(start)} - ${formatShortDate(end)}`;
+    }
+
+    function formatMonthTitle(monthKey) {
+      return new Intl.DateTimeFormat("de-DE", { month: "long", year: "numeric" }).format(parseMonthKey(monthKey));
+    }
+
+    function getIsoWeekNumber(date) {
+      const value = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNumber = value.getUTCDay() || 7;
+      value.setUTCDate(value.getUTCDate() + 4 - dayNumber);
+      const yearStart = new Date(Date.UTC(value.getUTCFullYear(), 0, 1));
+      return Math.ceil((((value - yearStart) / 86400000) + 1) / 7);
+    }
+
+    function getCalendarWeekKeys() {
+      const monthDate = parseMonthKey(state.calendarMonth);
+      const firstDay = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+      const lastDay = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
+      const firstWeek = getWeekStartDate(firstDay);
+      const lastWeek = getWeekStartDate(lastDay);
+      const keys = [];
+      for (let cursor = firstWeek; cursor <= lastWeek; cursor = addDays(cursor, 7)) {
+        keys.push(toIsoDateKey(cursor));
+      }
+      return keys;
+    }
+
+    function shiftCalendarMonth(direction) {
+      const current = parseMonthKey(state.calendarMonth);
+      state.calendarMonth = toMonthKey(new Date(current.getFullYear(), current.getMonth() + direction, 1));
+      renderSettings();
     }
 
     function getSelectableWeekKeys() {
@@ -2627,7 +2848,7 @@
       state.templates.forEach((template) => {
         const chip = document.createElement("button");
         chip.type = "button";
-        chip.className = "block-chip";
+        chip.className = `block-chip${template.id === state.selectedCalendarTemplateId ? " is-selected" : ""}`;
         chip.draggable = true;
         chip.dataset.templateId = template.id;
         chip.innerHTML = `
@@ -2639,12 +2860,15 @@
           event.dataTransfer.setData("text/plain", template.id);
         });
         chip.addEventListener("click", () => {
-          state.activeTemplateId = template.id;
-          state.settingsTab = "blocks";
-          setSettingsTab("blocks");
+          state.selectedCalendarTemplateId = template.id === state.selectedCalendarTemplateId ? "" : template.id;
+          renderSettings();
         });
         blockPalette.append(chip);
       });
+      const selectedTemplate = getTemplateById(state.selectedCalendarTemplateId);
+      calendarSelectionText.textContent = selectedTemplate
+        ? `${selectedTemplate.name} ausgewählt. Tippe eine Woche an, um den Block einzutragen.`
+        : "Keine Vorlage ausgewählt. Du kannst eine Vorlage antippen oder direkt ziehen.";
     }
 
     function getDateForDay(weekKey, dayId) {
@@ -2657,33 +2881,42 @@
     }
 
     function renderWeekSettings() {
+      calendarMonthTitle.textContent = formatMonthTitle(state.calendarMonth);
       renderBlockPalette();
       weekSettingsList.innerHTML = "";
-      getSelectableWeekKeys().forEach((weekKey) => {
+      const visibleMonth = parseMonthKey(state.calendarMonth).getMonth();
+      getCalendarWeekKeys().forEach((weekKey) => {
         const week = state.weeks[weekKey] || createWeekData();
         const template = week.type === NO_BLOCK_TYPE ? null : getTemplateById(week.templateId);
         const row = document.createElement("div");
         row.className = `week-plan-row${weekKey === state.selectedWeek ? " is-current" : ""}`;
         row.dataset.weekKey = weekKey;
         row.innerHTML = `
-          <div class="week-plan-label">
-            <span class="week-plan-title">${escapeHtml(formatWeekLabel(weekKey))}</span>
-            <span class="week-plan-subtitle">${escapeHtml(template ? `${template.name} · ${getWeekTypeLabel(template.type)}` : "Keine Schule/MAK")}</span>
+          <div class="week-number-cell">
+            <span class="week-number-badge">${escapeHtml(getIsoWeekNumber(parseWeekKey(weekKey)))}</span>
           </div>
           ${days.map((day) => {
             const date = getDateForDay(weekKey, day.id);
             return `
-              <div class="week-day-cell${isToday(date) ? " is-today" : ""}">
+              <div class="week-day-cell${isToday(date) ? " is-today" : ""}${date.getMonth() !== visibleMonth ? " is-muted" : ""}">
                 <span class="week-day-name">${escapeHtml(day.short)}</span>
-                <span class="week-day-date">${escapeHtml(formatShortDate(date))}</span>
+                <span class="week-day-date">${escapeHtml(String(date.getDate()))}</span>
               </div>
             `;
           }).join("")}
-          <div class="week-plan-actions">
-            <span class="week-plan-subtitle">${escapeHtml(template ? template.name : "Leer")}</span>
-            <button class="mini-btn danger" type="button" data-week-clear="${escapeHtml(weekKey)}">Leeren</button>
-          </div>
+          <button class="week-block-pill${template ? "" : " is-empty"}" type="button" data-block-type="${escapeHtml(template?.type || "none")}" title="${escapeHtml(template ? `${template.name} · ${getWeekTypeLabel(template.type)}` : "Keine Schule/MAK")}">
+            ${escapeHtml(template ? template.name : (state.selectedCalendarTemplateId ? "Hier eintragen" : "Keine Schule/MAK"))}
+          </button>
+          <button class="mini-btn danger week-clear-btn" type="button" data-week-clear="${escapeHtml(weekKey)}">Leeren</button>
         `;
+        row.addEventListener("click", (event) => {
+          if (event.target.closest("[data-week-clear]")) return;
+          if (state.selectedCalendarTemplateId) {
+            applyTemplateToWeek(weekKey, state.selectedCalendarTemplateId);
+            return;
+          }
+          selectWeek(weekKey);
+        });
         row.addEventListener("dragover", (event) => {
           event.preventDefault();
           row.classList.add("is-drop-target");
@@ -2702,7 +2935,10 @@
       });
 
       weekSettingsList.querySelectorAll("[data-week-clear]").forEach((button) => {
-        button.addEventListener("click", () => clearWeekBlock(button.dataset.weekClear));
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          clearWeekBlock(button.dataset.weekClear);
+        });
       });
     }
 
@@ -2982,6 +3218,7 @@
     }
 
     function openSettings() {
+      state.calendarMonth = toMonthKey(parseWeekKey(state.selectedWeek));
       settingsModal.hidden = false;
       renderSettings();
     }
@@ -3010,6 +3247,8 @@
     settingsTabs.forEach((tab) => {
       tab.addEventListener("click", () => setSettingsTab(tab.dataset.settingsTab));
     });
+    prevCalendarMonthBtn.addEventListener("click", () => shiftCalendarMonth(-1));
+    nextCalendarMonthBtn.addEventListener("click", () => shiftCalendarMonth(1));
     addTemplateBtn.addEventListener("click", createTemplateFromActive);
     addTeacherBtn.addEventListener("click", addTeacher);
     settingsModal.addEventListener("click", (event) => {
