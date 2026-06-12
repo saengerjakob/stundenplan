@@ -871,7 +871,7 @@
     .calendar-header,
     .week-plan-row {
       display: grid;
-      grid-template-columns: 42px repeat(5, minmax(64px, 1fr));
+      grid-template-columns: 44px repeat(5, minmax(58px, 1fr));
       gap: 0;
     }
 
@@ -884,7 +884,7 @@
     }
 
     .calendar-header span {
-      min-height: 30px;
+      min-height: 28px;
       display: grid;
       place-items: center;
       border-left: 1px solid #303b42;
@@ -895,7 +895,7 @@
     }
 
     .week-plan-row {
-      min-height: 72px;
+      min-height: 58px;
       padding: 0;
       position: relative;
       border: 0;
@@ -922,9 +922,9 @@
       grid-column: 1;
       grid-row: 1;
       display: grid;
-      align-content: start;
+      align-content: center;
       justify-items: center;
-      padding-top: 7px;
+      padding: 0;
       border-right: 1px solid #263238;
       background: #11171a;
     }
@@ -957,15 +957,16 @@
     }
 
     .week-day-cell {
-      min-height: 72px;
+      min-height: 58px;
       border: 0;
       border-left: 1px solid #263238;
       border-radius: 0;
-      padding: 7px 8px 5px;
+      padding: 8px 6px 5px;
       background: transparent;
       color: #dce5e9;
       display: grid;
-      align-content: start;
+      align-content: center;
+      justify-items: center;
       gap: 0;
     }
 
@@ -981,6 +982,7 @@
       font-size: 13px;
       font-weight: 700;
       color: #d8e1e6;
+      line-height: 1;
     }
 
     .week-day-cell.is-muted {
@@ -991,13 +993,15 @@
       grid-column: 2 / 7;
       grid-row: 1;
       align-self: end;
-      min-height: 22px;
-      margin: 31px 8px 0;
-      border-radius: 4px;
-      padding: 0 9px;
+      justify-self: start;
+      max-width: calc(100% - 16px);
+      min-height: 16px;
+      margin: 0 8px 6px;
+      border-radius: 999px;
+      padding: 0 7px;
       background: #6276d8;
       color: #f1f5ff;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 750;
       text-align: left;
       overflow: hidden;
@@ -1018,8 +1022,9 @@
 
     .week-clear-btn {
       position: absolute;
-      right: 6px;
-      bottom: 6px;
+      right: 5px;
+      top: 5px;
+      bottom: auto;
       z-index: 3;
       opacity: 0;
       pointer-events: none;
@@ -1253,18 +1258,18 @@
 
       .calendar-header,
       .week-plan-row {
-        grid-template-columns: 32px repeat(5, minmax(44px, 1fr));
+        grid-template-columns: 34px repeat(5, minmax(42px, 1fr));
       }
 
       .week-plan-row,
       .week-day-cell {
-        min-height: 66px;
+        min-height: 52px;
       }
 
       .week-block-pill {
-        min-height: 20px;
-        margin: 29px 5px 0;
-        padding: 0 7px;
+        min-height: 15px;
+        margin: 0 5px 5px;
+        padding: 0 6px;
         font-size: 10px;
       }
 
@@ -1275,16 +1280,12 @@
       }
 
       .week-day-cell {
-        padding: 5px 5px 4px;
-      }
-
-      .week-day-date {
-        font-size: 11px;
+        padding: 7px 5px 4px;
       }
 
       .week-clear-btn {
         right: 5px;
-        bottom: 5px;
+        top: 5px;
       }
 
       .mini-btn {
@@ -1519,11 +1520,11 @@
           <div class="calendar-frame">
             <div class="calendar-header" aria-hidden="true">
               <span>KW</span>
-              <span>M</span>
-              <span>D</span>
-              <span>M</span>
-              <span>D</span>
-              <span>F</span>
+              <span>Mo</span>
+              <span>Di</span>
+              <span>Mi</span>
+              <span>Do</span>
+              <span>Fr</span>
             </div>
             <div class="week-settings-list" id="weekSettingsList"></div>
           </div>
@@ -2933,7 +2934,6 @@
             const date = getDateForDay(weekKey, day.id);
             return `
               <div class="week-day-cell${isToday(date) ? " is-today" : ""}${date.getMonth() !== visibleMonth ? " is-muted" : ""}">
-                <span class="week-day-name">${escapeHtml(day.short)}</span>
                 <span class="week-day-date">${escapeHtml(String(date.getDate()))}</span>
               </div>
             `;
