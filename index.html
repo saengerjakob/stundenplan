@@ -7,24 +7,24 @@
   <style>
     :root {
       color-scheme: dark;
-      --bg: #0c0d0f;
-      --surface: #151719;
-      --surface-2: #1d2226;
-      --line: #313a40;
+      --bg: #0a0f12;
+      --surface: #11171b;
+      --surface-2: #151d22;
+      --line: #26323a;
       --text: #edf3f6;
-      --muted: #9faab2;
+      --muted: #93a2ac;
       --soft: #c7d1d6;
       --card: #d2d9dd;
       --card-text: #151d22;
       --green: #39d39c;
       --green-deep: #143d32;
       --orange: #ff714d;
-      --radius: 8px;
+      --radius: 10px;
       --time-w: 74px;
       --day-w: 168px;
       --day-count: 5;
       --hour-h: 78px;
-      --shadow: 0 12px 28px rgb(0 0 0 / 0.26);
+      --shadow: 0 14px 34px rgb(0 0 0 / 0.22);
     }
 
     * {
@@ -56,19 +56,20 @@
     button {
       border: 0;
       cursor: pointer;
+      transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
     }
 
     .app {
       min-height: 100dvh;
-      background: #0d0f11;
+      background: radial-gradient(circle at 50% -20%, #132029 0, #0a0f12 420px);
     }
 
     .topbar {
       position: sticky;
       top: 0;
       z-index: 30;
-      background: rgb(5 6 7 / 0.96);
-      border-bottom: 1px solid #1c2226;
+      background: rgb(10 15 18 / 0.9);
+      border-bottom: 1px solid #1b272f;
       padding: 14px clamp(12px, 3vw, 28px);
       backdrop-filter: blur(12px);
     }
@@ -99,26 +100,37 @@
 
     .sync-status {
       flex: 0 0 auto;
-      border: 1px solid #2e393f;
+      border: 1px solid #27343c;
       border-radius: 999px;
       padding: 6px 10px;
       color: var(--muted);
-      background: #111518;
+      background: #0f1518;
       font-size: 12px;
       line-height: 1;
       white-space: nowrap;
     }
 
-    .top-action {
+    .top-action,
+    .account-pill {
       height: 34px;
-      border: 1px solid #303b42;
-      border-radius: var(--radius);
+      border: 1px solid #27343c;
+      border-radius: 999px;
       padding: 0 12px;
-      background: #151b1f;
+      background: #11191d;
       color: var(--text);
       font-size: 13px;
       font-weight: 650;
       white-space: nowrap;
+    }
+
+    .account-pill {
+      color: var(--muted);
+    }
+
+    .account-pill.is-signed-in {
+      border-color: rgb(57 211 156 / 0.42);
+      color: #dffbf2;
+      background: rgb(57 211 156 / 0.1);
     }
 
     .week-controls {
@@ -131,9 +143,9 @@
     .week-select,
     .week-step {
       height: 34px;
-      border: 1px solid #303b42;
-      border-radius: var(--radius);
-      background: #151b1f;
+      border: 1px solid #27343c;
+      border-radius: 999px;
+      background: #11191d;
       color: var(--text);
     }
 
@@ -169,9 +181,9 @@
 
     .day-name {
       min-height: 42px;
-      border-left: 1px solid #273137;
+      border-left: 1px solid #223039;
       border-radius: 0;
-      background: #14191d;
+      background: #10171b;
       color: #c8d2d8;
       text-align: center;
       line-height: 1;
@@ -184,8 +196,9 @@
     }
 
     .day-name.is-selected {
-      background: var(--green);
-      color: #071f18;
+      background: rgb(57 211 156 / 0.14);
+      color: #ddfbf2;
+      box-shadow: inset 0 -2px 0 var(--green);
     }
 
     .main {
@@ -200,8 +213,8 @@
 
     .schedule-shell,
     .panel {
-      border: 1px solid #273137;
-      border-radius: var(--radius);
+      border: 1px solid #223039;
+      border-radius: 14px;
       background: var(--surface);
       box-shadow: var(--shadow);
     }
@@ -209,7 +222,7 @@
     .schedule-shell {
       min-width: 0;
       overflow: auto;
-      border-radius: var(--radius);
+      border-radius: 14px;
       scrollbar-width: thin;
       scrollbar-color: #4a565e #151719;
     }
@@ -424,7 +437,8 @@
 
     .panel-header {
       padding: 16px;
-      border-bottom: 1px solid #283237;
+      border-bottom: 1px solid #223039;
+      background: #10171b;
     }
 
     .panel-title {
@@ -464,9 +478,9 @@
       width: 100%;
       min-height: 160px;
       resize: vertical;
-      border: 1px solid #364148;
-      border-radius: var(--radius);
-      background: #101315;
+      border: 1px solid #2a3841;
+      border-radius: 12px;
+      background: #0c1215;
       color: var(--text);
       padding: 12px;
       line-height: 1.45;
@@ -502,13 +516,14 @@
 
     .btn {
       min-height: 40px;
-      border-radius: var(--radius);
+      border: 1px solid transparent;
+      border-radius: 999px;
       padding: 0 12px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       color: #eef6f8;
-      background: #293239;
+      background: #1a252b;
       font-weight: 700;
       line-height: 1.15;
     }
@@ -520,8 +535,30 @@
 
     .btn.ghost {
       background: transparent;
-      border: 1px solid #3a464d;
+      border-color: #2f3e47;
       color: #dbe5ea;
+    }
+
+    .btn:hover,
+    .top-action:hover,
+    .account-pill:hover,
+    .week-step:hover,
+    .calendar-step:hover,
+    .tab:hover,
+    .settings-tab:hover {
+      border-color: #3a4b55;
+      background: #172126;
+    }
+
+    .btn.primary:hover {
+      border-color: transparent;
+      background: #55e0b0;
+      color: #06241c;
+    }
+
+    .settings-tab.is-selected:hover {
+      border-color: rgb(57 211 156 / 0.42);
+      background: rgb(57 211 156 / 0.12);
     }
 
     .btn:focus-visible,
@@ -552,15 +589,16 @@
 
     .tab {
       height: 38px;
-      border-radius: var(--radius);
-      background: #242c31;
+      border-radius: 999px;
+      background: #162026;
       color: #cdd7dd;
       font-weight: 700;
     }
 
     .tab.is-selected {
-      background: var(--orange);
-      color: #210d06;
+      background: rgb(255 113 77 / 0.16);
+      color: #ffd8ce;
+      box-shadow: inset 0 0 0 1px rgb(255 113 77 / 0.32);
     }
 
     .export-box {
@@ -586,6 +624,7 @@
       place-items: center;
       padding: 20px;
       background: rgb(0 0 0 / 0.72);
+      backdrop-filter: blur(10px);
     }
 
     .modal-backdrop[hidden] {
@@ -629,10 +668,10 @@
       width: min(1180px, 100%);
       max-height: min(860px, 94dvh);
       overflow: hidden;
-      border: 1px solid #334047;
-      border-radius: 12px;
-      background: #121619;
-      box-shadow: 0 24px 70px rgb(0 0 0 / 0.58);
+      border: 1px solid #25323a;
+      border-radius: 16px;
+      background: #0f1417;
+      box-shadow: 0 28px 80px rgb(0 0 0 / 0.5);
       display: grid;
       grid-template-rows: auto auto 1fr;
     }
@@ -642,8 +681,8 @@
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      padding: 18px 20px;
-      border-bottom: 1px solid #283238;
+      padding: 18px 20px 16px;
+      border-bottom: 1px solid #1f2a31;
     }
 
     .settings-head h2 {
@@ -657,9 +696,9 @@
       height: 34px;
       display: grid;
       place-items: center;
-      border: 1px solid #334047;
-      border-radius: var(--radius);
-      background: #1a2024;
+      border: 1px solid #28353d;
+      border-radius: 12px;
+      background: #11191d;
       color: var(--text);
       font-size: 22px;
       line-height: 1;
@@ -667,35 +706,37 @@
 
     .settings-tabs {
       display: flex;
-      gap: 8px;
-      padding: 12px 18px 0;
-      border-bottom: 1px solid #283238;
+      gap: 6px;
+      padding: 12px 18px;
+      border-bottom: 1px solid #1f2a31;
       overflow-x: auto;
+      background: #0f1417;
     }
 
     .settings-tab {
-      min-height: 38px;
-      border: 1px solid #303b42;
-      border-bottom: 0;
-      border-radius: var(--radius) var(--radius) 0 0;
-      padding: 0 12px;
-      background: #171c20;
-      color: #cdd7dd;
-      font-size: 13px;
+      min-height: 34px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 0 13px;
+      background: transparent;
+      color: #aebbc3;
+      font-size: 12px;
       font-weight: 750;
       white-space: nowrap;
     }
 
     .settings-tab.is-selected {
-      background: #20282d;
+      border-color: rgb(57 211 156 / 0.38);
+      background: rgb(57 211 156 / 0.1);
       color: var(--text);
-      box-shadow: inset 0 3px 0 var(--green);
+      box-shadow: none;
     }
 
     .settings-content {
       min-height: 0;
       overflow: auto;
       padding: 18px;
+      background: #0f1417;
     }
 
     .settings-panel {
@@ -725,7 +766,7 @@
       min-height: 34px;
       border: 1px solid #303b42;
       border-radius: var(--radius);
-      background: #101417;
+      background: #0c1215;
       color: var(--text);
       padding: 7px 9px;
       font-size: 13px;
@@ -750,10 +791,10 @@
       position: sticky;
       top: 0;
       z-index: 8;
-      margin: -18px -18px 16px;
+      margin: -18px -18px 14px;
       padding: 14px 16px;
-      border-bottom: 1px solid #222c31;
-      background: #101417;
+      border-bottom: 1px solid #1f2a31;
+      background: #0f1417;
     }
 
     .calendar-toolbar {
@@ -779,9 +820,9 @@
     .calendar-step {
       width: 34px;
       height: 30px;
-      border: 1px solid #334047;
+      border: 1px solid #28353d;
       border-radius: var(--radius);
-      background: #151b1f;
+      background: #11191d;
       color: #e5eef2;
       font-size: 22px;
       line-height: 1;
@@ -806,9 +847,9 @@
     .teacher-row,
     .account-box,
     .day-entry-card {
-      border: 1px solid #303b42;
+      border: 1px solid #26343c;
       border-radius: var(--radius);
-      background: #171c20;
+      background: #11191d;
     }
 
     .block-chip {
@@ -829,7 +870,7 @@
 
     .block-chip.is-selected {
       border-color: var(--green);
-      background: #17231f;
+      background: rgb(57 211 156 / 0.1);
       box-shadow: 0 0 0 2px rgb(57 211 156 / 0.16);
     }
 
@@ -859,9 +900,9 @@
 
     .calendar-frame {
       overflow: hidden;
-      border: 1px solid #263238;
-      border-radius: 10px;
-      background: #0f1417;
+      border: 1px solid #233039;
+      border-radius: 12px;
+      background: #0c1215;
     }
 
     .calendar-frame .week-settings-list {
@@ -880,7 +921,7 @@
       font-size: 11px;
       font-weight: 750;
       text-align: center;
-      background: #11171a;
+      background: #0f171b;
     }
 
     .calendar-header span {
@@ -899,7 +940,7 @@
       padding: 0;
       position: relative;
       border: 0;
-      border-top: 1px solid #263238;
+      border-top: 1px solid #233039;
       border-radius: 0;
       overflow: hidden;
       cursor: pointer;
@@ -911,11 +952,11 @@
     }
 
     .week-plan-row.is-drop-target {
-      background: #17231f;
+      background: rgb(57 211 156 / 0.08);
     }
 
     .week-plan-row:hover {
-      background: #12191c;
+      background: #10181c;
     }
 
     .week-number-cell {
@@ -925,8 +966,8 @@
       align-content: center;
       justify-items: center;
       padding: 0;
-      border-right: 1px solid #263238;
-      background: #11171a;
+      border-right: 1px solid #233039;
+      background: #0f171b;
     }
 
     .week-number-badge {
@@ -959,7 +1000,7 @@
     .week-day-cell {
       min-height: 58px;
       border: 0;
-      border-left: 1px solid #263238;
+      border-left: 1px solid #233039;
       border-radius: 0;
       padding: 8px 6px 5px;
       background: transparent;
@@ -993,8 +1034,10 @@
       grid-column: 2 / 7;
       grid-row: 1;
       align-self: end;
-      justify-self: start;
-      max-width: calc(100% - 16px);
+      justify-self: stretch;
+      display: flex;
+      align-items: center;
+      max-width: none;
       min-height: 16px;
       margin: 0 8px 6px;
       border-radius: 999px;
@@ -1229,8 +1272,13 @@
         order: 3;
       }
 
-      .top-action {
+      .top-action,
+      .account-pill {
         order: 4;
+      }
+
+      .sync-status {
+        order: 5;
       }
 
       .week-select {
@@ -1418,6 +1466,7 @@
           <button class="week-step" id="nextWeekBtn" type="button" aria-label="Nächste Woche">›</button>
         </div>
         <button class="top-action" id="settingsBtn" type="button">Einstellungen</button>
+        <button class="account-pill" id="accountStatusBtn" type="button">Gast</button>
         <div class="sync-status" id="syncStatus">Lokal</div>
       </div>
 
@@ -1722,6 +1771,7 @@
     const pdfAllBtn = document.querySelector("#pdfAllBtn");
     const copyToast = document.querySelector("#copyToast");
     const syncStatus = document.querySelector("#syncStatus");
+    const accountStatusBtn = document.querySelector("#accountStatusBtn");
     const printArea = document.querySelector("#printArea");
     const introModal = document.querySelector("#introModal");
     const introCloseBtn = document.querySelector("#introCloseBtn");
@@ -1812,6 +1862,13 @@
 
     function setSyncStatus(text) {
       syncStatus.textContent = text;
+    }
+
+    function renderAccountStatus() {
+      const username = state.currentUser;
+      accountStatusBtn.textContent = username ? `Angemeldet: ${username}` : "Gast";
+      accountStatusBtn.classList.toggle("is-signed-in", Boolean(username));
+      accountStatusBtn.title = username ? "Konto öffnen" : "Anmelden oder Konto erstellen";
     }
 
     function getWeekStartDate(date = new Date()) {
@@ -2100,6 +2157,7 @@
       renderTabs();
       renderExport();
       renderSettings();
+      renderAccountStatus();
       updateNowLine();
     }
 
@@ -3281,6 +3339,10 @@
     settingsTabs.forEach((tab) => {
       tab.addEventListener("click", () => setSettingsTab(tab.dataset.settingsTab));
     });
+    accountStatusBtn.addEventListener("click", () => {
+      openSettings();
+      setSettingsTab("account");
+    });
     prevCalendarMonthBtn.addEventListener("click", () => shiftCalendarMonth(-1));
     nextCalendarMonthBtn.addEventListener("click", () => shiftCalendarMonth(1));
     addTemplateBtn.addEventListener("click", createTemplateFromActive);
@@ -3341,6 +3403,7 @@
     renderGrid();
     renderTabs();
     renderExport();
+    renderAccountStatus();
     showIntroIfNeeded();
     setupFirebaseSync();
     updateNowLine();
