@@ -370,6 +370,19 @@
       display: block;
     }
 
+    .lesson.day-entry-lesson {
+      background: #20313a;
+      color: #eaf4f6;
+    }
+
+    .lesson.day-entry-lesson::before {
+      background: var(--green);
+    }
+
+    .lesson.day-entry-lesson .lesson-note-dot {
+      display: block;
+    }
+
     .now-line {
       position: absolute;
       z-index: 12;
@@ -518,6 +531,12 @@
       outline-offset: 2px;
     }
 
+    .btn:disabled,
+    .settings-select:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
     .toast {
       min-height: 20px;
       color: var(--green);
@@ -615,7 +634,7 @@
       background: #121619;
       box-shadow: 0 24px 70px rgb(0 0 0 / 0.58);
       display: grid;
-      grid-template-rows: auto 1fr;
+      grid-template-rows: auto auto 1fr;
     }
 
     .settings-head {
@@ -646,25 +665,49 @@
       line-height: 1;
     }
 
-    .settings-grid {
-      min-height: 0;
-      display: grid;
-      grid-template-columns: minmax(300px, 0.82fr) minmax(520px, 1.18fr);
-      gap: 0;
-      overflow: hidden;
+    .settings-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 12px 18px 0;
+      border-bottom: 1px solid #283238;
+      overflow-x: auto;
     }
 
-    .settings-section {
+    .settings-tab {
+      min-height: 38px;
+      border: 1px solid #303b42;
+      border-bottom: 0;
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 0 12px;
+      background: #171c20;
+      color: #cdd7dd;
+      font-size: 13px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .settings-tab.is-selected {
+      background: #20282d;
+      color: var(--text);
+      box-shadow: inset 0 3px 0 var(--green);
+    }
+
+    .settings-content {
       min-height: 0;
       overflow: auto;
       padding: 18px;
     }
 
-    .settings-section + .settings-section {
-      border-left: 1px solid #283238;
+    .settings-panel {
+      display: none;
+      min-height: 0;
     }
 
-    .settings-section h3 {
+    .settings-panel.is-active {
+      display: block;
+    }
+
+    .settings-panel h3 {
       margin: 0 0 6px;
       font-size: 17px;
     }
@@ -674,56 +717,6 @@
       color: var(--muted);
       font-size: 13px;
       line-height: 1.4;
-    }
-
-    .week-settings-list,
-    .template-list,
-    .lesson-editor-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .week-plan-row,
-    .template-card,
-    .lesson-edit-row {
-      border: 1px solid #303b42;
-      border-radius: var(--radius);
-      background: #171c20;
-    }
-
-    .week-plan-row {
-      display: grid;
-      grid-template-columns: minmax(120px, 1fr) 132px minmax(160px, 1fr);
-      gap: 8px;
-      align-items: center;
-      padding: 10px;
-    }
-
-    .week-plan-row.is-current {
-      border-color: var(--green);
-    }
-
-    .week-plan-label {
-      display: grid;
-      gap: 3px;
-      min-width: 0;
-    }
-
-    .week-plan-title {
-      color: var(--text);
-      font-size: 14px;
-      font-weight: 700;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .week-plan-subtitle {
-      color: var(--muted);
-      font-size: 12px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .settings-select,
@@ -738,13 +731,176 @@
       font-size: 13px;
     }
 
+    .settings-textarea {
+      min-height: 96px;
+      font-size: 13px;
+    }
+
+    .block-palette,
+    .week-settings-list,
+    .template-list,
+    .lesson-editor-list,
+    .teacher-list,
+    .day-entry-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .block-palette {
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      margin-bottom: 16px;
+    }
+
+    .block-chip,
+    .week-plan-row,
+    .template-card,
+    .lesson-edit-row,
+    .teacher-row,
+    .account-box,
+    .day-entry-card {
+      border: 1px solid #303b42;
+      border-radius: var(--radius);
+      background: #171c20;
+    }
+
+    .block-chip {
+      display: grid;
+      gap: 4px;
+      padding: 10px;
+      color: var(--text);
+      text-align: left;
+      cursor: grab;
+    }
+
+    .block-chip:active {
+      cursor: grabbing;
+    }
+
+    .block-chip-title,
+    .template-card-title {
+      display: block;
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .block-chip-meta,
+    .template-card-meta,
+    .week-plan-subtitle,
+    .day-entry-meta {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .calendar-header,
+    .week-plan-row {
+      display: grid;
+      grid-template-columns: minmax(150px, 0.92fr) repeat(5, minmax(74px, 1fr)) minmax(118px, 0.8fr);
+      gap: 6px;
+      align-items: stretch;
+    }
+
+    .calendar-header {
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      text-align: center;
+    }
+
+    .calendar-header span:first-child {
+      text-align: left;
+    }
+
+    .week-plan-row {
+      padding: 8px;
+      transition: border-color 0.16s ease, background 0.16s ease;
+    }
+
+    .week-plan-row.is-current {
+      border-color: var(--green);
+    }
+
+    .week-plan-row.is-drop-target {
+      border-color: var(--green);
+      background: #17231f;
+    }
+
+    .week-plan-label {
+      display: grid;
+      gap: 3px;
+      align-content: center;
+      min-width: 0;
+    }
+
+    .week-plan-title {
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 750;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .week-day-cell {
+      min-height: 54px;
+      border: 1px solid #2a343a;
+      border-radius: var(--radius);
+      padding: 7px;
+      background: #111619;
+      color: #dce5e9;
+      display: grid;
+      align-content: center;
+      gap: 4px;
+    }
+
+    .week-day-cell.is-today {
+      border-color: var(--green);
+    }
+
+    .week-day-name {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      text-transform: uppercase;
+    }
+
+    .week-day-date {
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .week-plan-actions {
+      display: grid;
+      gap: 6px;
+      align-content: center;
+    }
+
+    .mini-btn {
+      min-height: 30px;
+      border-radius: var(--radius);
+      padding: 0 9px;
+      background: #242c31;
+      color: #dbe5ea;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .mini-btn.danger {
+      background: #2a1a19;
+      color: #ffb8a8;
+    }
+
     .template-toolbar,
-    .template-editor-head {
+    .template-editor-head,
+    .teacher-toolbar,
+    .account-actions {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
       margin-bottom: 12px;
+      flex-wrap: wrap;
     }
 
     .template-list {
@@ -763,23 +919,19 @@
       background: #17231f;
     }
 
-    .template-card-title {
-      display: block;
-      margin-bottom: 4px;
-      font-size: 14px;
-      font-weight: 750;
-    }
-
-    .template-card-meta {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .template-form-grid {
+    .template-form-grid,
+    .account-form-grid,
+    .day-entry-form-grid {
       display: grid;
-      grid-template-columns: 1fr 160px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
       margin-bottom: 12px;
+    }
+
+    .template-form-grid .wide,
+    .account-form-grid .wide,
+    .day-entry-form-grid .wide {
+      grid-column: 1 / -1;
     }
 
     .lesson-edit-row {
@@ -790,7 +942,16 @@
       padding: 8px;
     }
 
-    .lesson-remove {
+    .teacher-row {
+      display: grid;
+      grid-template-columns: 120px minmax(160px, 1fr) 34px;
+      gap: 8px;
+      align-items: center;
+      padding: 8px;
+    }
+
+    .lesson-remove,
+    .teacher-remove {
       width: 34px;
       height: 34px;
       border-radius: var(--radius);
@@ -800,68 +961,79 @@
       line-height: 1;
     }
 
+    .account-box {
+      padding: 14px;
+    }
+
+    .account-status {
+      margin: 0 0 12px;
+      color: #dce5e9;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .day-entry-card {
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .day-entry-title {
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .empty-week-panel {
+      padding: 16px;
+      border: 1px solid #273137;
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .empty-week-panel h2 {
+      margin: 0 0 6px;
+      font-size: 18px;
+    }
+
+    .empty-week-panel p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .day-entry-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .day-entry-button {
+      min-height: 96px;
+      border: 1px solid #303b42;
+      border-radius: var(--radius);
+      padding: 10px;
+      background: #171c20;
+      color: var(--text);
+      text-align: left;
+      display: grid;
+      align-content: start;
+      gap: 5px;
+    }
+
+    .day-entry-button.is-selected,
+    .day-entry-button:hover {
+      border-color: var(--green);
+      background: #17231f;
+    }
+
     .settings-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
       margin-top: 12px;
-    }
-
-    .settings-modal {
-      width: min(900px, 100%);
-    }
-
-    .settings-grid {
-      grid-template-columns: 1fr;
-      overflow: auto;
-    }
-
-    .settings-section + .settings-section {
-      border-left: 0;
-      border-top: 1px solid #283238;
-    }
-
-    .week-plan-row {
-      grid-template-columns: minmax(160px, 1fr) auto;
-    }
-
-    .week-type-buttons,
-    .plan-switch {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .type-choice {
-      min-height: 34px;
-      border: 1px solid #334047;
-      border-radius: var(--radius);
-      padding: 0 10px;
-      background: #20272c;
-      color: #d9e2e7;
-      font-size: 13px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .type-choice.is-selected {
-      border-color: var(--green);
-      background: var(--green);
-      color: #082117;
-    }
-
-    .template-list {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      margin-bottom: 14px;
-    }
-
-    .template-editor-head h3 {
-      margin: 0;
-      font-size: 16px;
-    }
-
-    .template-form-grid {
-      display: none;
     }
 
     @media (max-width: 1280px) {
@@ -909,23 +1081,23 @@
         max-height: 96dvh;
       }
 
-      .settings-grid {
-        grid-template-columns: 1fr;
-        overflow: auto;
-      }
-
-      .settings-section + .settings-section {
-        border-left: 0;
-        border-top: 1px solid #283238;
-      }
-
       .week-plan-row,
       .lesson-edit-row,
-      .template-form-grid {
+      .teacher-row,
+      .calendar-header,
+      .template-form-grid,
+      .account-form-grid,
+      .day-entry-form-grid,
+      .day-entry-grid {
         grid-template-columns: 1fr;
       }
 
-      .lesson-remove {
+      .calendar-header {
+        display: none;
+      }
+
+      .lesson-remove,
+      .teacher-remove {
         width: 100%;
       }
 
@@ -1124,15 +1296,57 @@
       <div class="settings-head">
         <div>
           <h2 id="settingsTitle">Einstellungen</h2>
-          <p class="settings-hint">Wähle pro Woche einfach aus, ob dort Berufsschule oder MAK ist.</p>
+          <p class="settings-hint">Plane Wochen, bearbeite Blöcke, pflege Lehrernamen und verwalte dein lokales Konto.</p>
         </div>
         <button class="icon-btn" id="settingsCloseBtn" type="button" aria-label="Einstellungen schließen">×</button>
       </div>
-      <div class="settings-grid">
-        <section class="settings-section" aria-label="Wochen planen">
+      <div class="settings-tabs" role="tablist" aria-label="Einstellungen">
+        <button class="settings-tab is-selected" id="settingsTabCalendar" type="button" role="tab" aria-selected="true" data-settings-tab="calendar">Kalender</button>
+        <button class="settings-tab" id="settingsTabBlocks" type="button" role="tab" aria-selected="false" data-settings-tab="blocks">Blöcke</button>
+        <button class="settings-tab" id="settingsTabTeachers" type="button" role="tab" aria-selected="false" data-settings-tab="teachers">Lehrer</button>
+        <button class="settings-tab" id="settingsTabAccount" type="button" role="tab" aria-selected="false" data-settings-tab="account">Konto</button>
+      </div>
+      <div class="settings-content">
+        <section class="settings-panel is-active" id="settingsPanelCalendar" role="tabpanel" aria-labelledby="settingsTabCalendar" data-settings-panel="calendar">
           <h3>Wochen planen</h3>
-          <p class="settings-hint">Ein Klick reicht. Die Woche übernimmt automatisch den passenden Standardplan.</p>
+          <p class="settings-hint">Ziehe einen gespeicherten Block auf eine Woche. Nicht belegte Wochen bleiben leer.</p>
+          <div class="block-palette" id="blockPalette"></div>
+          <div class="calendar-header" aria-hidden="true">
+            <span>Woche</span>
+            <span>Mo</span>
+            <span>Di</span>
+            <span>Mi</span>
+            <span>Do</span>
+            <span>Fr</span>
+            <span>Status</span>
+          </div>
           <div class="week-settings-list" id="weekSettingsList"></div>
+        </section>
+        <section class="settings-panel" id="settingsPanelBlocks" role="tabpanel" aria-labelledby="settingsTabBlocks" data-settings-panel="blocks">
+          <div class="template-toolbar">
+            <div>
+              <h3>Blöcke bearbeiten</h3>
+              <p class="settings-hint">Der Berufsschulblock und der MAK-Block sind als Standard vorhanden. Eigene Kopien kannst du löschen.</p>
+            </div>
+            <button class="btn primary" id="addTemplateBtn" type="button">Block hinzufügen</button>
+          </div>
+          <div class="template-list" id="templateList"></div>
+          <div id="templateEditor"></div>
+        </section>
+        <section class="settings-panel" id="settingsPanelTeachers" role="tabpanel" aria-labelledby="settingsTabTeachers" data-settings-panel="teachers">
+          <div class="teacher-toolbar">
+            <div>
+              <h3>Lehrer</h3>
+              <p class="settings-hint">Trage die Abkürzung aus dem Stundenplan und den vollen Namen für den Export ein.</p>
+            </div>
+            <button class="btn primary" id="addTeacherBtn" type="button">Lehrer hinzufügen</button>
+          </div>
+          <div class="teacher-list" id="teacherList"></div>
+        </section>
+        <section class="settings-panel" id="settingsPanelAccount" role="tabpanel" aria-labelledby="settingsTabAccount" data-settings-panel="account">
+          <h3>Konto</h3>
+          <p class="settings-hint">Konten sind optional und lokal in diesem Browser gespeichert. Private Tages-Einträge werden nicht mit der Klasse synchronisiert.</p>
+          <div id="accountPanel"></div>
         </section>
       </div>
     </section>
@@ -1155,7 +1369,7 @@
       appId: "1:446054068766:web:942491ffb4fc7d8d02740f"
     };
 
-    const teacherNames = {
+    const defaultTeacherNames = {
       Adl: "Addala",
       Gll: "Gall",
       Hai: "Haigis",
@@ -1164,12 +1378,27 @@
       Gör: "Görl"
     };
 
+    const NO_BLOCK_TYPE = "none";
     const DEFAULT_TEMPLATE_ID = "berufsschule-standard";
     const DEFAULT_MAK_TEMPLATE_ID = "mak-standard";
 
     const weekTypes = {
+      none: "Keine Schule/MAK",
       berufsschule: "Berufsschule",
       mak: "MAK"
+    };
+
+    const blockTypes = {
+      berufsschule: "Berufsschule",
+      mak: "MAK"
+    };
+
+    const dayEntryTypes = {
+      betrieb: "B - Betrieb",
+      seminar: "S - Seminar",
+      projekt: "P - Projekt",
+      feiertag: "Feiertag",
+      urlaub: "Urlaub"
     };
 
     const days = [
@@ -1256,6 +1485,10 @@
       selectedWeek: savedData.selectedWeek,
       templates: savedData.templates,
       activeTemplateId: savedData.activeTemplateId,
+      teachers: savedData.teachers,
+      accounts: savedData.accounts,
+      currentUser: savedData.currentUser,
+      settingsTab: "calendar",
       selectedLessonId: null,
       scheduleDay: "mo",
       exportDay: "mo"
@@ -1286,7 +1519,16 @@
     const settingsBtn = document.querySelector("#settingsBtn");
     const settingsModal = document.querySelector("#settingsModal");
     const settingsCloseBtn = document.querySelector("#settingsCloseBtn");
+    const settingsTabs = document.querySelectorAll(".settings-tab");
+    const settingsPanels = document.querySelectorAll(".settings-panel");
+    const blockPalette = document.querySelector("#blockPalette");
     const weekSettingsList = document.querySelector("#weekSettingsList");
+    const templateList = document.querySelector("#templateList");
+    const templateEditor = document.querySelector("#templateEditor");
+    const addTemplateBtn = document.querySelector("#addTemplateBtn");
+    const teacherList = document.querySelector("#teacherList");
+    const addTeacherBtn = document.querySelector("#addTeacherBtn");
+    const accountPanel = document.querySelector("#accountPanel");
 
     let remotePlanRef = null;
     let setRemoteDoc = null;
@@ -1303,12 +1545,18 @@
         }
         const templates = normalizeTemplates(data.templates);
         const activeTemplateId = getExistingTemplateId(data.activeTemplateId, templates);
+        const teachers = normalizeTeachers(data.teachers);
+        const accounts = normalizeAccounts(data.accounts);
+        const currentUser = accounts[data.currentUser] ? data.currentUser : "";
         if (data.weeks) {
           return {
             weeks: normalizeWeeks(data.weeks),
             selectedWeek: data.selectedWeek || currentWeek,
             templates,
-            activeTemplateId
+            activeTemplateId,
+            teachers,
+            accounts,
+            currentUser
           };
         }
         if (data.notes) {
@@ -1316,14 +1564,20 @@
             weeks: createEmptyWeeks(currentWeek, data.notes),
             selectedWeek: data.selectedWeek || currentWeek,
             templates,
-            activeTemplateId
+            activeTemplateId,
+            teachers,
+            accounts,
+            currentUser
           };
         }
         return {
           weeks: createEmptyWeeks(currentWeek, data),
           selectedWeek: currentWeek,
           templates,
-          activeTemplateId
+          activeTemplateId,
+          teachers,
+          accounts,
+          currentUser
         };
       } catch {
         return createDefaultData(currentWeek);
@@ -1335,7 +1589,10 @@
         weeks: state.weeks,
         selectedWeek: state.selectedWeek,
         templates: state.templates,
-        activeTemplateId: state.activeTemplateId
+        activeTemplateId: state.activeTemplateId,
+        teachers: state.teachers,
+        accounts: state.accounts,
+        currentUser: state.currentUser
       }));
       if (!applyingRemoteData) queueRemoteSave();
     }
@@ -1401,7 +1658,10 @@
         weeks: createEmptyWeeks(currentWeek),
         selectedWeek: currentWeek,
         templates: normalizeTemplates(),
-        activeTemplateId: DEFAULT_TEMPLATE_ID
+        activeTemplateId: DEFAULT_TEMPLATE_ID,
+        teachers: normalizeTeachers(),
+        accounts: {},
+        currentUser: ""
       };
     }
 
@@ -1409,13 +1669,82 @@
       return (lessons || []).map((lesson) => ({ ...lesson }));
     }
 
-    function normalizeTemplates() {
-      return defaultTemplates.map((template) => ({
-        id: template.id,
-        name: template.name,
-        type: template.type,
-        lessons: cloneLessons(template.lessons)
-      }));
+    function normalizeTemplates(templates) {
+      const storedTemplates = Array.isArray(templates) ? templates : [];
+      const normalizedDefaults = defaultTemplates.map((template) => {
+        const stored = storedTemplates.find((item) => item && item.id === template.id);
+        return {
+          id: template.id,
+          name: String(stored?.name || template.name),
+          type: blockTypes[stored?.type] ? stored.type : template.type,
+          lessons: stored ? normalizeLessons(stored.lessons) : cloneLessons(template.lessons)
+        };
+      });
+      const customTemplates = storedTemplates
+        .filter((template) => template && template.id && !defaultTemplates.some((item) => item.id === template.id))
+        .map((template) => ({
+          id: String(template.id),
+          name: String(template.name || "Stundenplan"),
+          type: blockTypes[template.type] ? template.type : "berufsschule",
+          lessons: normalizeLessons(template.lessons)
+        }));
+      return [...normalizedDefaults, ...customTemplates];
+    }
+
+    function normalizeLessons(lessons) {
+      return (Array.isArray(lessons) ? lessons : [])
+        .filter((lesson) => lesson && lesson.day && lesson.start && lesson.end)
+        .map((lesson) => ({
+          id: String(lesson.id || makeLessonId(lesson)),
+          day: days.some((day) => day.id === lesson.day) ? lesson.day : "mo",
+          start: Math.min(12, Math.max(1, Number(lesson.start) || 1)),
+          end: Math.min(12, Math.max(1, Number(lesson.end) || Number(lesson.start) || 1)),
+          subject: String(lesson.subject || "Fach"),
+          teacher: String(lesson.teacher || ""),
+          room: String(lesson.room || ""),
+          tone: lesson.tone ? String(lesson.tone) : ""
+        }))
+        .map((lesson) => ({
+          ...lesson,
+          end: Math.max(lesson.start, lesson.end)
+        }));
+    }
+
+    function normalizeTeachers(teachers) {
+      return {
+        ...defaultTeacherNames,
+        ...(teachers && typeof teachers === "object" ? teachers : {})
+      };
+    }
+
+    function normalizeAccounts(accounts) {
+      if (!accounts || typeof accounts !== "object") return {};
+      return Object.fromEntries(Object.entries(accounts)
+        .filter(([username, account]) => username && account && typeof account === "object")
+        .map(([username, account]) => [
+          username,
+          {
+            passwordHash: String(account.passwordHash || ""),
+            dayEntries: normalizeDayEntries(account.dayEntries)
+          }
+        ]));
+    }
+
+    function normalizeDayEntries(entries) {
+      if (!entries || typeof entries !== "object") return {};
+      return Object.fromEntries(Object.entries(entries)
+        .filter(([dateKey, entry]) => dateKey && entry && typeof entry === "object")
+        .map(([dateKey, entry]) => [
+          dateKey,
+          {
+            type: dayEntryTypes[entry.type] ? entry.type : "betrieb",
+            title: String(entry.title || ""),
+            description: String(entry.description || ""),
+            timeBeforeBreak: String(entry.timeBeforeBreak || entry.morningStart || ""),
+            timeAfterBreak: String(entry.timeAfterBreak || entry.afternoonStart || ""),
+            exportDescription: entry.exportDescription !== false
+          }
+        ]));
     }
 
     function getExistingTemplateId(templateId, templates = state.templates) {
@@ -1424,16 +1753,20 @@
     }
 
     function getDefaultTemplateIdForType(type) {
+      if (type === NO_BLOCK_TYPE) return "";
       if (type === "mak") return DEFAULT_MAK_TEMPLATE_ID;
       return DEFAULT_TEMPLATE_ID;
     }
 
-    function createWeekData(notes = {}, type = "berufsschule") {
-      const safeType = weekTypes[type] ? type : "berufsschule";
+    function createWeekData(notes = {}, type = NO_BLOCK_TYPE, templateId = "") {
+      const safeType = weekTypes[type] ? type : NO_BLOCK_TYPE;
+      const safeTemplateId = safeType === NO_BLOCK_TYPE
+        ? ""
+        : (templateId || getDefaultTemplateIdForType(safeType));
       return {
         notes: notes || {},
         type: safeType,
-        templateId: getDefaultTemplateIdForType(safeType)
+        templateId: safeTemplateId
       };
     }
 
@@ -1442,20 +1775,25 @@
         key,
         createWeekData(
           value && value.notes ? value.notes : {},
-          value && value.type ? value.type : "berufsschule"
+          value && value.type ? value.type : "berufsschule",
+          value && value.templateId ? value.templateId : ""
         )
       ]));
     }
 
     function createEmptyWeeks(weekKey, notes = {}) {
-      return { [weekKey]: createWeekData(notes) };
+      return { [weekKey]: createWeekData(notes, "berufsschule", DEFAULT_TEMPLATE_ID) };
     }
 
     function getWeekData(weekKey = state.selectedWeek) {
       if (!state.weeks[weekKey]) {
         state.weeks[weekKey] = createWeekData();
       }
-      state.weeks[weekKey].templateId = getDefaultTemplateIdForType(state.weeks[weekKey].type);
+      if (state.weeks[weekKey].type === NO_BLOCK_TYPE) {
+        state.weeks[weekKey].templateId = "";
+      } else if (!getTemplateById(state.weeks[weekKey].templateId)) {
+        state.weeks[weekKey].templateId = getDefaultTemplateIdForType(state.weeks[weekKey].type);
+      }
       return state.weeks[weekKey];
     }
 
@@ -1487,6 +1825,7 @@
 
     function getActiveTemplate() {
       const week = getActiveWeekData();
+      if (week.type === NO_BLOCK_TYPE || !week.templateId) return null;
       return getTemplateById(week.templateId) || getTemplateById(getDefaultTemplateIdForType(week.type)) || state.templates[0];
     }
 
@@ -1519,6 +1858,7 @@
       state.weeks = normalizeWeeks(data.weeks || createEmptyWeeks(state.selectedWeek, data.notes || {}));
       state.templates = normalizeTemplates(data.templates);
       state.activeTemplateId = getExistingTemplateId(data.activeTemplateId, state.templates);
+      state.teachers = normalizeTeachers(data.teachers);
       if (!state.weeks[state.selectedWeek]) {
         state.weeks[state.selectedWeek] = createWeekData();
       }
@@ -1535,7 +1875,7 @@
         option.value = weekKey;
         option.textContent = week
           ? `${formatWeekLabel(weekKey)} · ${getWeekTypeLabel(week.type)}`
-          : formatWeekLabel(weekKey);
+          : `${formatWeekLabel(weekKey)} · ${getWeekTypeLabel(NO_BLOCK_TYPE)}`;
         option.selected = weekKey === state.selectedWeek;
         weekSelect.append(option);
       });
@@ -1565,6 +1905,7 @@
             weeks: state.weeks,
             templates: state.templates,
             activeTemplateId: state.activeTemplateId,
+            teachers: state.teachers,
             updatedAt: remoteServerTimestamp()
           }, { merge: true });
           setSyncStatus("Online gespeichert");
@@ -1717,7 +2058,7 @@
       const names = String(value)
         .split(/\s+/)
         .filter(Boolean)
-        .map((part) => teacherNames[part] || part)
+        .map((part) => state.teachers[part] || part)
       if (names.length <= 2) return names.join(" und ");
       return `${names.slice(0, -1).join(", ")} und ${names.at(-1)}`;
     }
@@ -1771,6 +2112,12 @@
         }
       });
 
+      if (!getActiveTemplate()) {
+        renderDayEntryCards(visibleDays);
+        updateNowLine();
+        return;
+      }
+
       getActiveLessons().forEach((lesson) => {
         const entry = getEntry(lesson.id);
         const button = document.createElement("button");
@@ -1799,6 +2146,37 @@
       updateNowLine();
     }
 
+    function renderDayEntryCards(visibleDays) {
+      if (!getCurrentAccount()) return;
+      visibleDays.forEach((day, col) => {
+        const entry = getDayEntry(day.id);
+        if (!entry) return;
+        const button = document.createElement("button");
+        const times = [entry.timeBeforeBreak, entry.timeAfterBreak].filter(Boolean).join(" / ");
+        button.className = "lesson day-entry-lesson";
+        button.style.setProperty("--col", col);
+        button.style.setProperty("--start", 1);
+        button.style.setProperty("--span", 12);
+        button.type = "button";
+        button.setAttribute("aria-label", `${day.label} ${dayEntryTypes[entry.type]} ${entry.title}`);
+        button.innerHTML = `
+          <span class="lesson-subject">${escapeHtml(entry.title || dayEntryTypes[entry.type])}</span>
+          <span class="lesson-teacher">${escapeHtml(dayEntryTypes[entry.type])}</span>
+          <span class="lesson-room">${escapeHtml(times || "Ganztag")}</span>
+          <span class="lesson-note-dot">Privat</span>
+        `;
+        button.addEventListener("click", () => {
+          state.scheduleDay = day.id;
+          state.exportDay = day.id;
+          renderScheduleDays();
+          renderTabs();
+          renderEditor();
+          renderExport();
+        });
+        gridArea.append(button);
+      });
+    }
+
     function renderTabs() {
       dayTabs.innerHTML = "";
       days.forEach((day) => {
@@ -1823,6 +2201,11 @@
     }
 
     function renderEditor() {
+      if (!getActiveTemplate()) {
+        renderDayEntryEditor();
+        return;
+      }
+
       const lesson = getLesson(state.selectedLessonId);
       if (!lesson) {
         editorTitle.textContent = "Stunde auswählen";
@@ -1873,7 +2256,126 @@
       });
     }
 
+    function renderDayEntryEditor() {
+      const day = days.find((item) => item.id === state.scheduleDay) || days[0];
+      const account = getCurrentAccount();
+      editorTitle.textContent = "Ganztagseintrag";
+      editorMeta.textContent = `${formatWeekLabel(state.selectedWeek)} · ${day.label}`;
+
+      if (!account) {
+        editorBody.innerHTML = `
+          <div class="empty-state">Diese Woche ist leer. Melde dich mit einem lokalen Konto an, um private Ganztages-Einträge für Betrieb, Seminar, Projekt, Feiertag oder Urlaub zu speichern.</div>
+          <div class="button-row">
+            <button class="btn primary" id="openAccountSettingsBtn" type="button">Konto öffnen</button>
+          </div>
+        `;
+        document.querySelector("#openAccountSettingsBtn").addEventListener("click", () => {
+          openSettings();
+          setSettingsTab("account");
+        });
+        return;
+      }
+
+      const entry = getDayEntry(day.id) || {
+        type: "betrieb",
+        title: "",
+        description: "",
+        timeBeforeBreak: "",
+        timeAfterBreak: "",
+        exportDescription: true
+      };
+
+      editorBody.innerHTML = `
+        <div class="day-entry-grid">
+          ${days.map((item) => {
+            const itemEntry = getDayEntry(item.id);
+            const date = getDateForDay(state.selectedWeek, item.id);
+            return `
+              <button class="day-entry-button${item.id === day.id ? " is-selected" : ""}" type="button" data-day-entry="${item.id}">
+                <span class="week-day-name">${escapeHtml(item.short)} · ${escapeHtml(formatShortDate(date))}</span>
+                <span class="day-entry-title">${escapeHtml(itemEntry?.title || "Kein Eintrag")}</span>
+                <span class="day-entry-meta">${escapeHtml(itemEntry ? dayEntryTypes[itemEntry.type] : "Leer")}</span>
+              </button>
+            `;
+          }).join("")}
+        </div>
+        <div class="day-entry-form-grid">
+          <label>
+            <span class="field-label">Art</span>
+            <select class="settings-select" id="dayEntryType">${getDayEntryTypeOptions(entry.type)}</select>
+          </label>
+          <label>
+            <span class="field-label">Titel</span>
+            <input class="settings-input" id="dayEntryTitle" value="${escapeHtml(entry.title)}" placeholder="z. B. Projektarbeit">
+          </label>
+          <label>
+            <span class="field-label">Zeit vor Mittag</span>
+            <input class="settings-input" id="dayEntryTimeBefore" value="${escapeHtml(entry.timeBeforeBreak)}" placeholder="07:45-12:00">
+          </label>
+          <label>
+            <span class="field-label">Zeit nach Mittag</span>
+            <input class="settings-input" id="dayEntryTimeAfter" value="${escapeHtml(entry.timeAfterBreak)}" placeholder="12:45-16:45">
+          </label>
+          <label class="wide">
+            <span class="field-label">Beschreibung</span>
+            <textarea class="settings-textarea" id="dayEntryDescription" placeholder="Was soll im Bericht stehen?">${escapeHtml(entry.description)}</textarea>
+          </label>
+        </div>
+        <label class="check-row">
+          <input type="checkbox" id="dayEntryExport" ${entry.exportDescription ? "checked" : ""}>
+          <span>Beschreibung exportieren</span>
+        </label>
+        <div class="button-row">
+          <button class="btn primary" id="saveDayEntryBtn" type="button">Speichern</button>
+          <button class="btn ghost" id="clearDayEntryBtn" type="button">Leeren</button>
+        </div>
+        <div class="toast" id="dayEntryToast" aria-live="polite"></div>
+      `;
+
+      editorBody.querySelectorAll("[data-day-entry]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.scheduleDay = button.dataset.dayEntry;
+          state.exportDay = button.dataset.dayEntry;
+          renderScheduleDays();
+          renderTabs();
+          renderEditor();
+          renderExport();
+        });
+      });
+
+      const dayEntryToast = document.querySelector("#dayEntryToast");
+      document.querySelector("#saveDayEntryBtn").addEventListener("click", () => {
+        setDayEntry(day.id, {
+          type: document.querySelector("#dayEntryType").value,
+          title: document.querySelector("#dayEntryTitle").value,
+          timeBeforeBreak: document.querySelector("#dayEntryTimeBefore").value,
+          timeAfterBreak: document.querySelector("#dayEntryTimeAfter").value,
+          description: document.querySelector("#dayEntryDescription").value,
+          exportDescription: document.querySelector("#dayEntryExport").checked
+        });
+        dayEntryToast.textContent = "Gespeichert.";
+        renderEditor();
+        renderExport();
+      });
+
+      document.querySelector("#clearDayEntryBtn").addEventListener("click", () => {
+        setDayEntry(day.id, {
+          type: "betrieb",
+          title: "",
+          timeBeforeBreak: "",
+          timeAfterBreak: "",
+          description: "",
+          exportDescription: true
+        });
+        renderEditor();
+        renderExport();
+      });
+    }
+
     function exportForDay(dayId) {
+      if (!getActiveTemplate()) {
+        return exportDayEntry(dayId);
+      }
       return getActiveLessons()
         .filter((lesson) => lesson.day === dayId)
         .sort((a, b) => a.start - b.start)
@@ -1886,10 +2388,23 @@
         .join("\n");
     }
 
+    function exportDayEntry(dayId) {
+      const entry = getDayEntry(dayId);
+      if (!entry) return "";
+      const parts = [];
+      const times = [entry.timeBeforeBreak, entry.timeAfterBreak].filter(Boolean).join(" / ");
+      parts.push(`${dayEntryTypes[entry.type]}${entry.title ? ` - ${entry.title}` : ""}`);
+      if (times) parts.push(`Zeit: ${times}`);
+      if (entry.exportDescription && entry.description) parts.push(entry.description);
+      return parts.join("\n");
+    }
+
     function renderExport() {
       const day = days.find((item) => item.id === state.exportDay);
       const text = exportForDay(state.exportDay);
-      exportText.value = text || `${day.label}: Noch keine Notizen mit Text eingetragen.`;
+      exportText.value = text || (getActiveTemplate()
+        ? `${day.label}: Noch keine Notizen mit Text eingetragen.`
+        : `${day.label}: Noch kein privater Ganztagseintrag eingetragen.`);
     }
 
     function exportAllDays() {
@@ -1928,7 +2443,7 @@
     }
 
     function getWeekTypeOptions(selectedType) {
-      return Object.entries(weekTypes)
+      return Object.entries(blockTypes)
         .map(([value, label]) => `<option value="${value}" ${value === selectedType ? "selected" : ""}>${label}</option>`)
         .join("");
     }
@@ -1980,8 +2495,16 @@
     function setWeekType(weekKey, type) {
       ensureWeek(weekKey);
       const week = getWeekData(weekKey);
-      week.type = weekTypes[type] ? type : "berufsschule";
-      week.templateId = getExistingTemplateId(getDefaultTemplateIdForType(week.type));
+      week.type = weekTypes[type] ? type : NO_BLOCK_TYPE;
+      week.templateId = week.type === NO_BLOCK_TYPE ? "" : getExistingTemplateId(getDefaultTemplateIdForType(week.type));
+      refreshAfterSettingsChange(weekKey);
+    }
+
+    function clearWeekBlock(weekKey) {
+      ensureWeek(weekKey);
+      const week = getWeekData(weekKey);
+      week.type = NO_BLOCK_TYPE;
+      week.templateId = "";
       refreshAfterSettingsChange(weekKey);
     }
 
@@ -2001,13 +2524,26 @@
       renderSettings();
     }
 
+    function setSettingsTab(tabName) {
+      state.settingsTab = tabName;
+      settingsTabs.forEach((tab) => {
+        const isSelected = tab.dataset.settingsTab === tabName;
+        tab.classList.toggle("is-selected", isSelected);
+        tab.setAttribute("aria-selected", String(isSelected));
+      });
+      settingsPanels.forEach((panel) => {
+        panel.classList.toggle("is-active", panel.dataset.settingsPanel === tabName);
+      });
+      renderSettings();
+    }
+
     function createTemplateFromActive() {
       const source = getTemplateById(state.activeTemplateId) || getActiveTemplate() || state.templates[0];
       const template = {
         id: makeTemplateId(),
-        name: `${source.name} Kopie`,
+        name: source?.type === "mak" ? "Neuer MAK-Block" : "Neuer Berufsschulblock",
         type: source.type,
-        lessons: cloneLessons(source.lessons)
+        lessons: []
       };
       state.templates.push(template);
       state.activeTemplateId = template.id;
@@ -2033,7 +2569,7 @@
       const template = getTemplateById(state.activeTemplateId);
       if (!template) return;
       if (field === "type") {
-        template.type = weekTypes[value] ? value : template.type;
+        template.type = blockTypes[value] ? value : template.type;
         Object.values(state.weeks).forEach((week) => {
           if (week.templateId === template.id) week.type = template.type;
         });
@@ -2086,36 +2622,363 @@
       renderAfterScheduleChange();
     }
 
+    function renderBlockPalette() {
+      blockPalette.innerHTML = "";
+      state.templates.forEach((template) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "block-chip";
+        chip.draggable = true;
+        chip.dataset.templateId = template.id;
+        chip.innerHTML = `
+          <span class="block-chip-title">${escapeHtml(template.name)}</span>
+          <span class="block-chip-meta">${escapeHtml(getWeekTypeLabel(template.type))} · ${template.lessons.length} Einträge</span>
+        `;
+        chip.addEventListener("dragstart", (event) => {
+          event.dataTransfer.effectAllowed = "copy";
+          event.dataTransfer.setData("text/plain", template.id);
+        });
+        chip.addEventListener("click", () => {
+          state.activeTemplateId = template.id;
+          state.settingsTab = "blocks";
+          setSettingsTab("blocks");
+        });
+        blockPalette.append(chip);
+      });
+    }
+
+    function getDateForDay(weekKey, dayId) {
+      const dayIndex = days.findIndex((day) => day.id === dayId);
+      return addDays(parseWeekKey(weekKey), Math.max(0, dayIndex));
+    }
+
+    function isToday(date) {
+      return toIsoDateKey(date) === toIsoDateKey(new Date());
+    }
+
     function renderWeekSettings() {
+      renderBlockPalette();
       weekSettingsList.innerHTML = "";
       getSelectableWeekKeys().forEach((weekKey) => {
         const week = state.weeks[weekKey] || createWeekData();
-        const template = getTemplateById(week.templateId) || getTemplateById(getDefaultTemplateIdForType(week.type));
+        const template = week.type === NO_BLOCK_TYPE ? null : getTemplateById(week.templateId);
         const row = document.createElement("div");
         row.className = `week-plan-row${weekKey === state.selectedWeek ? " is-current" : ""}`;
         row.dataset.weekKey = weekKey;
         row.innerHTML = `
           <div class="week-plan-label">
             <span class="week-plan-title">${escapeHtml(formatWeekLabel(weekKey))}</span>
-            <span class="week-plan-subtitle">${escapeHtml(template?.name || "Keine Vorlage")}</span>
+            <span class="week-plan-subtitle">${escapeHtml(template ? `${template.name} · ${getWeekTypeLabel(template.type)}` : "Keine Schule/MAK")}</span>
           </div>
-          <div class="week-type-buttons" aria-label="Wochentyp">
-            ${Object.entries(weekTypes).map(([type, label]) => `
-              <button class="type-choice${week.type === type ? " is-selected" : ""}" type="button" data-week-key="${escapeHtml(weekKey)}" data-week-type="${escapeHtml(type)}">${escapeHtml(label)}</button>
-            `).join("")}
+          ${days.map((day) => {
+            const date = getDateForDay(weekKey, day.id);
+            return `
+              <div class="week-day-cell${isToday(date) ? " is-today" : ""}">
+                <span class="week-day-name">${escapeHtml(day.short)}</span>
+                <span class="week-day-date">${escapeHtml(formatShortDate(date))}</span>
+              </div>
+            `;
+          }).join("")}
+          <div class="week-plan-actions">
+            <span class="week-plan-subtitle">${escapeHtml(template ? template.name : "Leer")}</span>
+            <button class="mini-btn danger" type="button" data-week-clear="${escapeHtml(weekKey)}">Leeren</button>
           </div>
         `;
+        row.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          row.classList.add("is-drop-target");
+          event.dataTransfer.dropEffect = "copy";
+        });
+        row.addEventListener("dragleave", () => {
+          row.classList.remove("is-drop-target");
+        });
+        row.addEventListener("drop", (event) => {
+          event.preventDefault();
+          row.classList.remove("is-drop-target");
+          const templateId = event.dataTransfer.getData("text/plain");
+          applyTemplateToWeek(weekKey, templateId);
+        });
         weekSettingsList.append(row);
       });
 
-      weekSettingsList.querySelectorAll(".type-choice").forEach((button) => {
-        button.addEventListener("click", () => setWeekType(button.dataset.weekKey, button.dataset.weekType));
+      weekSettingsList.querySelectorAll("[data-week-clear]").forEach((button) => {
+        button.addEventListener("click", () => clearWeekBlock(button.dataset.weekClear));
+      });
+    }
+
+    function renderTemplateSettings() {
+      templateList.innerHTML = "";
+      state.templates.forEach((template) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = `template-card${template.id === state.activeTemplateId ? " is-selected" : ""}`;
+        card.innerHTML = `
+          <span class="template-card-title">${escapeHtml(template.name)}</span>
+          <span class="template-card-meta">${escapeHtml(getWeekTypeLabel(template.type))} · ${template.lessons.length} Einträge</span>
+        `;
+        card.addEventListener("click", () => selectTemplate(template.id));
+        templateList.append(card);
+      });
+
+      const template = getTemplateById(state.activeTemplateId) || state.templates[0];
+      if (!template) {
+        templateEditor.innerHTML = `<div class="empty-state">Noch kein Block vorhanden.</div>`;
+        return;
+      }
+
+      const isDefaultTemplate = defaultTemplates.some((item) => item.id === template.id);
+      templateEditor.innerHTML = `
+        <div class="template-editor-head">
+          <h3>${escapeHtml(template.name)}</h3>
+          <button class="btn ghost" id="deleteTemplateBtn" type="button" ${isDefaultTemplate ? "disabled" : ""}>Block löschen</button>
+        </div>
+        <div class="template-form-grid">
+          <label>
+            <span class="field-label">Name</span>
+            <input class="settings-input" id="templateNameInput" value="${escapeHtml(template.name)}">
+          </label>
+          <label>
+            <span class="field-label">Art</span>
+            <select class="settings-select" id="templateTypeInput" ${isDefaultTemplate ? "disabled" : ""}>${getWeekTypeOptions(template.type)}</select>
+          </label>
+        </div>
+        <div class="lesson-editor-list" id="lessonEditorList">
+          ${getSortedLessons(template).map((lesson) => `
+            <div class="lesson-edit-row" data-lesson-id="${escapeHtml(lesson.id)}">
+              <select class="settings-select" data-lesson-field="day">${getDayOptions(lesson.day)}</select>
+              <select class="settings-select" data-lesson-field="start">${getHourOptions(lesson.start)}</select>
+              <select class="settings-select" data-lesson-field="end">${getHourOptions(lesson.end)}</select>
+              <input class="settings-input" data-lesson-field="subject" value="${escapeHtml(lesson.subject)}" placeholder="Fach">
+              <input class="settings-input" data-lesson-field="teacher" value="${escapeHtml(lesson.teacher)}" placeholder="Lehrer">
+              <input class="settings-input" data-lesson-field="room" value="${escapeHtml(lesson.room)}" placeholder="Raum">
+              <button class="lesson-remove" type="button" data-remove-lesson="${escapeHtml(lesson.id)}" aria-label="Stunde löschen">×</button>
+            </div>
+          `).join("")}
+        </div>
+        <div class="settings-actions">
+          <button class="btn primary" id="addLessonBtn" type="button">Eintrag hinzufügen</button>
+        </div>
+      `;
+
+      document.querySelector("#templateNameInput").addEventListener("change", (event) => {
+        updateActiveTemplateMeta("name", event.target.value);
+      });
+      document.querySelector("#templateTypeInput")?.addEventListener("change", (event) => {
+        updateActiveTemplateMeta("type", event.target.value);
+      });
+      document.querySelector("#deleteTemplateBtn").addEventListener("click", deleteActiveTemplate);
+      document.querySelector("#addLessonBtn").addEventListener("click", addLessonToActiveTemplate);
+      templateEditor.querySelectorAll("[data-lesson-field]").forEach((input) => {
+        input.addEventListener("change", () => {
+          const row = input.closest("[data-lesson-id]");
+          updateLessonField(row.dataset.lessonId, input.dataset.lessonField, input.value);
+        });
+      });
+      templateEditor.querySelectorAll("[data-remove-lesson]").forEach((button) => {
+        button.addEventListener("click", () => removeLessonFromActiveTemplate(button.dataset.removeLesson));
+      });
+    }
+
+    function addTeacher() {
+      let base = "Neu";
+      let suffix = 1;
+      while (state.teachers[base]) {
+        suffix += 1;
+        base = `Neu${suffix}`;
+      }
+      state.teachers[base] = "Neuer Lehrer";
+      saveData();
+      renderSettings();
+      renderExport();
+    }
+
+    function updateTeacher(oldKey, newKey, fullName) {
+      const safeKey = newKey.trim();
+      if (!safeKey) return renderSettings();
+      const value = fullName.trim();
+      if (safeKey !== oldKey) {
+        delete state.teachers[oldKey];
+      }
+      state.teachers[safeKey] = value || safeKey;
+      saveData();
+      renderSettings();
+      renderExport();
+    }
+
+    function removeTeacher(key) {
+      delete state.teachers[key];
+      saveData();
+      renderSettings();
+      renderExport();
+    }
+
+    function renderTeacherSettings() {
+      teacherList.innerHTML = "";
+      Object.entries(state.teachers)
+        .sort(([a], [b]) => a.localeCompare(b, "de"))
+        .forEach(([abbr, fullName]) => {
+          const row = document.createElement("div");
+          row.className = "teacher-row";
+          row.innerHTML = `
+            <input class="settings-input" data-teacher-abbr value="${escapeHtml(abbr)}" aria-label="Lehrer-Abkürzung">
+            <input class="settings-input" data-teacher-name value="${escapeHtml(fullName)}" aria-label="Voller Lehrername">
+            <button class="teacher-remove" type="button" aria-label="Lehrer löschen">×</button>
+          `;
+          const abbrInput = row.querySelector("[data-teacher-abbr]");
+          const nameInput = row.querySelector("[data-teacher-name]");
+          const saveTeacher = () => updateTeacher(abbr, abbrInput.value, nameInput.value);
+          abbrInput.addEventListener("change", saveTeacher);
+          nameInput.addEventListener("change", saveTeacher);
+          row.querySelector(".teacher-remove").addEventListener("click", () => removeTeacher(abbr));
+          teacherList.append(row);
+        });
+    }
+
+    function getCurrentAccount() {
+      return state.currentUser ? state.accounts[state.currentUser] : null;
+    }
+
+    function getDayEntryDateKey(dayId, weekKey = state.selectedWeek) {
+      return toIsoDateKey(getDateForDay(weekKey, dayId));
+    }
+
+    function getDayEntry(dayId) {
+      const account = getCurrentAccount();
+      if (!account) return null;
+      return account.dayEntries[getDayEntryDateKey(dayId)] || null;
+    }
+
+    function setDayEntry(dayId, entry) {
+      const account = getCurrentAccount();
+      if (!account) return;
+      const dateKey = getDayEntryDateKey(dayId);
+      account.dayEntries[dateKey] = {
+        type: dayEntryTypes[entry.type] ? entry.type : "betrieb",
+        title: entry.title.trim(),
+        description: entry.description.trim(),
+        timeBeforeBreak: entry.timeBeforeBreak.trim(),
+        timeAfterBreak: entry.timeAfterBreak.trim(),
+        exportDescription: Boolean(entry.exportDescription)
+      };
+      if (!account.dayEntries[dateKey].title && !account.dayEntries[dateKey].description) {
+        delete account.dayEntries[dateKey];
+      }
+      saveData();
+    }
+
+    function getDayEntryTypeOptions(selectedType) {
+      return Object.entries(dayEntryTypes)
+        .map(([value, label]) => `<option value="${value}" ${value === selectedType ? "selected" : ""}>${label}</option>`)
+        .join("");
+    }
+
+    async function hashPassword(username, password) {
+      const input = `${username.trim().toLowerCase()}:bepo:${password}`;
+      if (window.crypto?.subtle) {
+        const bytes = new TextEncoder().encode(input);
+        const hash = await window.crypto.subtle.digest("SHA-256", bytes);
+        return Array.from(new Uint8Array(hash)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+      }
+      return btoa(unescape(encodeURIComponent(input)));
+    }
+
+    async function createAccount(username, password) {
+      const safeUsername = username.trim();
+      if (!safeUsername || !password) return "Bitte Benutzername und Passwort eintragen.";
+      if (state.accounts[safeUsername]) return "Diesen Benutzernamen gibt es schon lokal.";
+      state.accounts[safeUsername] = {
+        passwordHash: await hashPassword(safeUsername, password),
+        dayEntries: {}
+      };
+      state.currentUser = safeUsername;
+      saveData();
+      renderAfterScheduleChange();
+      return "Konto erstellt und angemeldet.";
+    }
+
+    async function loginAccount(username, password) {
+      const safeUsername = username.trim();
+      const account = state.accounts[safeUsername];
+      if (!account) return "Konto nicht gefunden.";
+      const passwordHash = await hashPassword(safeUsername, password);
+      if (passwordHash !== account.passwordHash) return "Passwort passt nicht.";
+      state.currentUser = safeUsername;
+      saveData();
+      renderAfterScheduleChange();
+      return "Angemeldet.";
+    }
+
+    function logoutAccount() {
+      state.currentUser = "";
+      saveData();
+      renderAfterScheduleChange();
+    }
+
+    function renderAccountSettings(message = "") {
+      const account = getCurrentAccount();
+      if (account) {
+        accountPanel.innerHTML = `
+          <div class="account-box">
+            <p class="account-status">Angemeldet als <strong>${escapeHtml(state.currentUser)}</strong>. Private Tages-Einträge sind nur in diesem Konto sichtbar.</p>
+            <div class="account-actions">
+              <button class="btn ghost" id="logoutBtn" type="button">Abmelden</button>
+            </div>
+            <div class="toast">${escapeHtml(message)}</div>
+          </div>
+        `;
+        document.querySelector("#logoutBtn").addEventListener("click", logoutAccount);
+        return;
+      }
+
+      accountPanel.innerHTML = `
+        <div class="account-box">
+          <div class="account-form-grid">
+            <label>
+              <span class="field-label">Benutzername</span>
+              <input class="settings-input" id="accountUsername" autocomplete="username">
+            </label>
+            <label>
+              <span class="field-label">Passwort</span>
+              <input class="settings-input" id="accountPassword" type="password" autocomplete="current-password">
+            </label>
+          </div>
+          <div class="account-actions">
+            <button class="btn primary" id="createAccountBtn" type="button">Konto erstellen</button>
+            <button class="btn ghost" id="loginAccountBtn" type="button">Anmelden</button>
+          </div>
+          <div class="toast" id="accountToast" aria-live="polite">${escapeHtml(message)}</div>
+        </div>
+      `;
+
+      const usernameInput = document.querySelector("#accountUsername");
+      const passwordInput = document.querySelector("#accountPassword");
+      const accountToast = document.querySelector("#accountToast");
+      document.querySelector("#createAccountBtn").addEventListener("click", async () => {
+        accountToast.textContent = await createAccount(usernameInput.value, passwordInput.value);
+      });
+      document.querySelector("#loginAccountBtn").addEventListener("click", async () => {
+        accountToast.textContent = await loginAccount(usernameInput.value, passwordInput.value);
       });
     }
 
     function renderSettings() {
       if (settingsModal.hidden) return;
+      setSettingsTabVisuals();
       renderWeekSettings();
+      renderTemplateSettings();
+      renderTeacherSettings();
+      renderAccountSettings();
+    }
+
+    function setSettingsTabVisuals() {
+      settingsTabs.forEach((tab) => {
+        const isSelected = tab.dataset.settingsTab === state.settingsTab;
+        tab.classList.toggle("is-selected", isSelected);
+        tab.setAttribute("aria-selected", String(isSelected));
+      });
+      settingsPanels.forEach((panel) => {
+        panel.classList.toggle("is-active", panel.dataset.settingsPanel === state.settingsTab);
+      });
     }
 
     function openSettings() {
@@ -2144,6 +3007,11 @@
 
     settingsBtn.addEventListener("click", openSettings);
     settingsCloseBtn.addEventListener("click", closeSettings);
+    settingsTabs.forEach((tab) => {
+      tab.addEventListener("click", () => setSettingsTab(tab.dataset.settingsTab));
+    });
+    addTemplateBtn.addEventListener("click", createTemplateFromActive);
+    addTeacherBtn.addEventListener("click", addTeacher);
     settingsModal.addEventListener("click", (event) => {
       if (event.target === settingsModal) closeSettings();
     });
