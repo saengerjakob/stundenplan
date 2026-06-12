@@ -1607,7 +1607,7 @@
           <div class="teacher-toolbar">
             <div>
               <h3>Lehrer</h3>
-              <p class="settings-hint">Trage die Abkürzung aus dem Stundenplan und den vollen Namen für den Export ein.</p>
+              <p class="settings-hint">Eine gemeinsame Lehrerliste für Berufsschule und MAK. Abkürzung im Block eintragen, vollen Namen hier für den Export pflegen.</p>
             </div>
             <button class="btn primary" id="addTeacherBtn" type="button">Lehrer hinzufügen</button>
           </div>
@@ -1641,11 +1641,17 @@
 
     const defaultTeacherNames = {
       Adl: "Addala",
+      Batz: "Batz",
+      Blm: "Blm",
       Gll: "Gall",
       Hai: "Haigis",
+      MA: "MA",
+      Mll: "Mll",
+      Rej: "Rej",
       Rhn: "Ringelhahn",
       Stü: "Stühler",
-      Gör: "Görl"
+      Gör: "Görl",
+      Tom: "Tom"
     };
 
     const NO_BLOCK_TYPE = "none";
@@ -1822,7 +1828,7 @@
         }
         const templates = normalizeTemplates(data.templates);
         const activeTemplateId = getExistingTemplateId(data.activeTemplateId, templates);
-        const teachers = normalizeTeachers(data.teachers);
+        const teachers = normalizeTeachers(data.teachers, templates);
         const accounts = normalizeAccounts(data.accounts);
         const currentUser = accounts[data.currentUser] ? data.currentUser : "";
         if (data.weeks) {
@@ -1862,6 +1868,7 @@
     }
 
     function saveData() {
+      syncTeachersFromTemplates();
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         weeks: state.weeks,
         selectedWeek: state.selectedWeek,
@@ -1986,7 +1993,7 @@
         selectedWeek: currentWeek,
         templates: normalizeTemplates(),
         activeTemplateId: DEFAULT_TEMPLATE_ID,
-        teachers: normalizeTeachers(),
+        teachers: normalizeTeachers(null, normalizeTemplates()),
         accounts: {},
         currentUser: ""
       };
@@ -2004,7 +2011,7 @@
           id: template.id,
           name: String(stored?.name || template.name),
           type: blockTypes[stored?.type] ? stored.type : template.type,
-          lessons: stored ? normalizeLessons(stored.lessons) : cloneLessons(template.lessons)
+          lessons: stored ? normalizeLessons(stored.lessons) : normalizeLessons(template.lessons)
         };
       });
       const customTemplates = storedTemplates
@@ -2027,7 +2034,7 @@
           start: Math.min(12, Math.max(1, Number(lesson.start) || 1)),
           end: Math.min(12, Math.max(1, Number(lesson.end) || Number(lesson.start) || 1)),
           subject: String(lesson.subject || "Fach"),
-          teacher: String(lesson.teacher || ""),
+          teacher: sanitizeTeacherValue(lesson.teacher),
           room: String(lesson.room || ""),
           tone: lesson.tone ? String(lesson.tone) : ""
         }))
@@ -2037,11 +2044,43 @@
         }));
     }
 
-    function normalizeTeachers(teachers) {
-      return {
+    function sanitizeTeacherValue(value) {
+      return String(value || "")
+        .split(/\s+/)
+        .map((part) => part.trim().replace(/\.{2,}$/g, ""))
+        .filter(Boolean)
+        .join(" ");
+    }
+
+    function getTeacherParts(value) {
+      return sanitizeTeacherValue(value).split(/\s+/).filter(Boolean);
+    }
+
+    function getTeacherAbbreviationsFromTemplates(templates) {
+      const abbreviations = new Set();
+      (templates || []).forEach((template) => {
+        (template.lessons || []).forEach((lesson) => {
+          getTeacherParts(lesson.teacher).forEach((part) => abbreviations.add(part));
+        });
+      });
+      return abbreviations;
+    }
+
+    function normalizeTeachers(teachers, templates = []) {
+      const normalized = {
         ...defaultTeacherNames,
         ...(teachers && typeof teachers === "object" ? teachers : {})
       };
+      getTeacherAbbreviationsFromTemplates(templates).forEach((abbr) => {
+        if (!normalized[abbr]) normalized[abbr] = abbr;
+      });
+      return normalized;
+    }
+
+    function syncTeachersFromTemplates() {
+      getTeacherAbbreviationsFromTemplates(state.templates).forEach((abbr) => {
+        if (!state.teachers[abbr]) state.teachers[abbr] = abbr;
+      });
     }
 
     function normalizeAccounts(accounts) {
@@ -2186,7 +2225,7 @@
       state.weeks = normalizeWeeks(data.weeks || createEmptyWeeks(state.selectedWeek, data.notes || {}));
       state.templates = normalizeTemplates(data.templates);
       state.activeTemplateId = getExistingTemplateId(data.activeTemplateId, state.templates);
-      state.teachers = normalizeTeachers(data.teachers);
+      state.teachers = normalizeTeachers(data.teachers, state.templates);
       if (!state.weeks[state.selectedWeek]) {
         state.weeks[state.selectedWeek] = createWeekData();
       }
@@ -2365,17 +2404,8 @@
       saveData();
     }
 
-    function lessonTouchesAnyHour(lesson, hourNumbers) {
-      for (let hour = lesson.start; hour <= lesson.end; hour += 1) {
-        if (hourNumbers.includes(hour)) return true;
-      }
-      return false;
-    }
-
     function getDisplayTeacherAbbreviation(lesson) {
-      if (lesson.day === "mo" && lessonTouchesAnyHour(lesson, [3, 4, 5])) return "Adl";
-      if (lesson.day === "fr" && lessonTouchesAnyHour(lesson, [1, 2, 3])) return "Adl";
-      return lesson.teacher;
+      return sanitizeTeacherValue(lesson.teacher);
     }
 
     function getExportTeacher(lesson) {
@@ -2385,6 +2415,7 @@
     function expandTeacherNames(value) {
       const names = String(value)
         .split(/\s+/)
+        .map((part) => part.trim().replace(/\.{2,}$/g, ""))
         .filter(Boolean)
         .map((part) => state.teachers[part] || part)
       if (names.length <= 2) return names.join(" und ");
@@ -2917,6 +2948,9 @@
       if (field === "start" || field === "end") {
         lesson[field] = Number(value);
         if (lesson.end < lesson.start) lesson.end = lesson.start;
+      } else if (field === "teacher") {
+        lesson[field] = sanitizeTeacherValue(value);
+        syncTeachersFromTemplates();
       } else {
         lesson[field] = value.trim();
       }
@@ -3155,6 +3189,7 @@
     }
 
     function renderTeacherSettings() {
+      syncTeachersFromTemplates();
       teacherList.innerHTML = "";
       Object.entries(state.teachers)
         .sort(([a], [b]) => a.localeCompare(b, "de"))
