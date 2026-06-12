@@ -750,8 +750,8 @@
       position: sticky;
       top: 0;
       z-index: 8;
-      margin: -18px -18px 14px;
-      padding: 18px 18px 14px;
+      margin: -18px -18px 12px;
+      padding: 14px 16px 10px;
       border-bottom: 1px solid #283238;
       background: #121619;
     }
@@ -760,29 +760,30 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
+      margin-bottom: 6px;
     }
 
     .calendar-toolbar h3 {
       margin: 0;
-      font-size: 22px;
+      font-size: 19px;
       line-height: 1.15;
       text-transform: capitalize;
     }
 
     .calendar-actions {
       display: flex;
-      gap: 8px;
+      gap: 6px;
     }
 
     .calendar-step {
-      width: 38px;
-      height: 34px;
+      width: 34px;
+      height: 30px;
       border: 1px solid #334047;
       border-radius: var(--radius);
       background: #1a2024;
       color: #e5eef2;
-      font-size: 26px;
+      font-size: 22px;
       line-height: 1;
       display: grid;
       place-items: center;
@@ -790,10 +791,10 @@
 
     .block-palette {
       display: flex;
-      gap: 8px;
+      gap: 7px;
       margin: 0;
       overflow-x: auto;
-      padding-bottom: 2px;
+      padding-bottom: 3px;
       scrollbar-width: thin;
       scrollbar-color: #4a565e #151719;
     }
@@ -812,9 +813,9 @@
 
     .block-chip {
       display: grid;
-      gap: 4px;
-      min-width: 176px;
-      padding: 10px;
+      gap: 3px;
+      min-width: 148px;
+      padding: 8px 9px;
       color: var(--text);
       text-align: left;
       cursor: grab;
@@ -831,17 +832,17 @@
     }
 
     .calendar-selection-text {
-      min-height: 20px;
-      margin-top: 8px;
+      min-height: 17px;
+      margin-top: 6px;
       color: var(--green);
-      font-size: 13px;
+      font-size: 12px;
       line-height: 1.35;
     }
 
     .block-chip-title,
     .template-card-title {
       display: block;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 750;
     }
 
@@ -857,7 +858,7 @@
     .calendar-frame {
       overflow: hidden;
       border: 1px solid #303b42;
-      border-radius: 12px;
+      border-radius: 10px;
       background: #111619;
     }
 
@@ -868,20 +869,20 @@
     .calendar-header,
     .week-plan-row {
       display: grid;
-      grid-template-columns: 54px repeat(5, minmax(74px, 1fr));
+      grid-template-columns: 46px repeat(5, minmax(62px, 1fr));
       gap: 0;
     }
 
     .calendar-header {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 750;
       text-align: center;
       background: #151b1f;
     }
 
     .calendar-header span {
-      min-height: 34px;
+      min-height: 28px;
       display: grid;
       place-items: center;
       border-left: 1px solid #303b42;
@@ -892,7 +893,7 @@
     }
 
     .week-plan-row {
-      min-height: 126px;
+      min-height: 84px;
       padding: 0;
       position: relative;
       border: 0;
@@ -921,18 +922,18 @@
       display: grid;
       align-content: start;
       justify-items: center;
-      padding-top: 10px;
+      padding-top: 8px;
       border-right: 1px solid #303b42;
       background: #14191d;
     }
 
     .week-number-badge {
-      min-width: 34px;
+      min-width: 30px;
       border-radius: 999px;
-      padding: 4px 7px;
+      padding: 3px 6px;
       background: #283239;
       color: #d9e2e7;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 800;
       text-align: center;
     }
@@ -954,16 +955,16 @@
     }
 
     .week-day-cell {
-      min-height: 126px;
+      min-height: 84px;
       border: 0;
       border-left: 1px solid #303b42;
       border-radius: 0;
-      padding: 8px 8px 6px;
+      padding: 6px 7px 5px;
       background: transparent;
       color: #dce5e9;
       display: grid;
       align-content: start;
-      gap: 4px;
+      gap: 2px;
     }
 
     .week-day-cell.is-today {
@@ -972,7 +973,7 @@
 
     .week-day-name {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 750;
       text-transform: uppercase;
     }
@@ -990,13 +991,13 @@
       grid-column: 2 / 7;
       grid-row: 1;
       align-self: end;
-      min-height: 30px;
-      margin: 48px 8px 0;
-      border-radius: 6px;
-      padding: 0 10px;
+      min-height: 24px;
+      margin: 34px 7px 0;
+      border-radius: 5px;
+      padding: 0 8px;
       background: #6882d8;
       color: #f1f5ff;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 750;
       text-align: left;
       overflow: hidden;
@@ -1020,18 +1021,18 @@
 
     .week-clear-btn {
       position: absolute;
-      right: 8px;
-      bottom: 8px;
+      right: 7px;
+      bottom: 7px;
       z-index: 3;
     }
 
     .mini-btn {
-      min-height: 30px;
+      min-height: 26px;
       border-radius: var(--radius);
-      padding: 0 9px;
+      padding: 0 8px;
       background: #242c31;
       color: #dbe5ea;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 750;
     }
 
@@ -1240,22 +1241,54 @@
       }
 
       .calendar-sticky {
-        margin: -18px -18px 12px;
+        margin: -18px -18px 10px;
+        padding: 12px 12px 9px;
       }
 
       .calendar-header,
       .week-plan-row {
-        grid-template-columns: 42px repeat(5, minmax(52px, 1fr));
+        grid-template-columns: 36px repeat(5, minmax(46px, 1fr));
       }
 
       .week-plan-row,
       .week-day-cell {
-        min-height: 118px;
+        min-height: 76px;
       }
 
       .week-block-pill {
-        margin-top: 46px;
+        min-height: 22px;
+        margin: 31px 5px 0;
+        padding: 0 7px;
+        font-size: 11px;
+      }
+
+      .week-number-badge {
+        min-width: 26px;
+        padding: 3px 5px;
+        font-size: 10px;
+      }
+
+      .week-day-cell {
+        padding: 5px 5px 4px;
+      }
+
+      .week-day-name {
+        font-size: 9px;
+      }
+
+      .week-day-date {
         font-size: 12px;
+      }
+
+      .week-clear-btn {
+        right: 5px;
+        bottom: 5px;
+      }
+
+      .mini-btn {
+        min-height: 24px;
+        padding: 0 7px;
+        font-size: 10px;
       }
 
       .lesson-remove,
