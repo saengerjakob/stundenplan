@@ -23,6 +23,7 @@
       --time-w: 74px;
       --day-w: 168px;
       --day-count: 5;
+      --hour-count: 12;
       --hour-h: 78px;
       --shadow: 0 14px 34px rgb(0 0 0 / 0.22);
     }
@@ -229,7 +230,7 @@
 
     .schedule {
       width: calc(var(--time-w) + var(--day-w) * var(--day-count));
-      min-height: calc(var(--hour-h) * 12);
+      min-height: calc(var(--hour-h) * var(--hour-count));
       display: grid;
       grid-template-columns: var(--time-w) repeat(var(--day-count), var(--day-w));
       position: relative;
@@ -263,6 +264,15 @@
       line-height: 1;
     }
 
+    .hour-end-time {
+      position: absolute;
+      right: 8px;
+      bottom: 7px;
+      color: #aeb9c0;
+      font-size: 13px;
+      line-height: 1;
+    }
+
     .hour-num {
       position: absolute;
       top: 50%;
@@ -277,7 +287,7 @@
       grid-column: 2 / -1;
       display: grid;
       grid-template-columns: repeat(var(--day-count), var(--day-w));
-      grid-template-rows: repeat(12, var(--hour-h));
+      grid-template-rows: repeat(var(--hour-count), var(--hour-h));
       position: relative;
       background: #141719;
     }
@@ -1685,7 +1695,7 @@
       { id: "fr", short: "Fr", label: "Freitag", date: "12. Juni" }
     ];
 
-    const hours = [
+    const schoolHours = [
       { nr: 1, time: "07:45" },
       { nr: 2, time: "08:30" },
       { nr: 3, time: "09:30", breakBefore: true },
@@ -1698,6 +1708,20 @@
       { nr: 10, time: "15:15", breakBefore: true },
       { nr: 11, time: "16:00" },
       { nr: 12, time: "16:45" }
+    ];
+
+    const makHours = [
+      { nr: 1, time: "07:45" },
+      { nr: 2, time: "08:30", endTime: "09:15" },
+      { nr: 3, time: "09:30", breakBefore: true },
+      { nr: 4, time: "10:15", endTime: "11:00" },
+      { nr: 5, time: "11:15", breakBefore: true },
+      { nr: 6, time: "12:00" },
+      { nr: 7, time: "12:45" },
+      { nr: 8, time: "13:30" },
+      { nr: 9, time: "14:15", endTime: "15:00" },
+      { nr: 10, time: "15:15", breakBefore: true },
+      { nr: 11, time: "16:00", endTime: "16:45" }
     ];
 
     const defaultLessons = [
@@ -2199,12 +2223,21 @@
       return getActiveTemplate()?.lessons || [];
     }
 
+    function getHoursForType(type) {
+      return type === "mak" ? makHours : schoolHours;
+    }
+
+    function getActiveHours() {
+      return getHoursForType(getActiveTemplate()?.type);
+    }
+
     function renderAfterScheduleChange() {
       if (state.selectedLessonId && !getLesson(state.selectedLessonId)) {
         state.selectedLessonId = null;
       }
       renderWeekSelect();
       renderScheduleDays();
+      renderTimeAxis();
       renderGrid();
       renderEditor();
       renderTabs();
@@ -2345,15 +2378,17 @@
 
     function getCurrentTimePosition(date = new Date()) {
       const nowMinutes = date.getHours() * 60 + date.getMinutes();
-      const starts = hours.map((hour) => timeToMinutes(hour.time));
+      const activeHours = getActiveHours();
+      const starts = activeHours.map((hour) => timeToMinutes(hour.time));
       const firstStart = starts[0];
-      const lastEnd = starts[starts.length - 1] + 45;
+      const lastHour = activeHours.at(-1);
+      const lastEnd = lastHour.endTime ? timeToMinutes(lastHour.endTime) : starts[starts.length - 1] + 45;
 
       if (nowMinutes < firstStart || nowMinutes > lastEnd) return null;
 
       for (let index = 0; index < starts.length; index += 1) {
         const start = starts[index];
-        const end = start + 45;
+        const end = activeHours[index].endTime ? timeToMinutes(activeHours[index].endTime) : start + 45;
         const nextStart = starts[index + 1];
 
         if (nowMinutes >= start && nowMinutes <= end) {
@@ -2365,7 +2400,7 @@
         }
       }
 
-      return hours.length;
+      return activeHours.length;
     }
 
     function updateNowLine() {
@@ -2430,10 +2465,16 @@
 
     function renderTimeAxis() {
       timeAxis.innerHTML = "";
-      hours.forEach((hour) => {
+      const activeHours = getActiveHours();
+      document.documentElement.style.setProperty("--hour-count", String(activeHours.length));
+      activeHours.forEach((hour) => {
         const slot = document.createElement("div");
         slot.className = `hour-slot${hour.breakBefore ? " break-before" : ""}`;
-        slot.innerHTML = `<span class="hour-time">${hour.time}</span><span class="hour-num">${hour.nr}.</span>`;
+        slot.innerHTML = `
+          <span class="hour-time">${hour.time}</span>
+          <span class="hour-num">${hour.nr}.</span>
+          ${hour.endTime ? `<span class="hour-end-time">${hour.endTime}</span>` : ""}
+        `;
         timeAxis.append(slot);
       });
     }
@@ -2462,8 +2503,10 @@
       gridArea.innerHTML = "";
       updateScheduleLayout();
       const visibleDays = getVisibleDays();
+      const activeHours = getActiveHours();
+      document.documentElement.style.setProperty("--hour-count", String(activeHours.length));
 
-      hours.forEach((hour) => {
+      activeHours.forEach((hour) => {
         for (let dayIndex = 0; dayIndex < visibleDays.length; dayIndex += 1) {
           const line = document.createElement("div");
           line.className = `grid-line${hour.breakBefore ? " break-before" : ""}`;
@@ -2819,8 +2862,8 @@
         .join("");
     }
 
-    function getHourOptions(selectedHour) {
-      return hours
+    function getHourOptions(selectedHour, type = getTemplateById(state.activeTemplateId)?.type) {
+      return getHoursForType(type)
         .map((hour) => `<option value="${hour.nr}" ${hour.nr === Number(selectedHour) ? "selected" : ""}>${hour.nr}.</option>`)
         .join("");
     }
@@ -2839,6 +2882,11 @@
         || a.start - b.start
         || a.end - b.end
       ));
+    }
+
+    function clampHourForType(value, type) {
+      const maxHour = getHoursForType(type).at(-1)?.nr || 12;
+      return Math.min(maxHour, Math.max(1, Number(value) || 1));
     }
 
     function refreshAfterSettingsChange(weekKey = state.selectedWeek) {
@@ -2929,6 +2977,10 @@
       if (!template) return;
       if (field === "type") {
         template.type = blockTypes[value] ? value : template.type;
+        template.lessons.forEach((lesson) => {
+          lesson.start = clampHourForType(lesson.start, template.type);
+          lesson.end = Math.max(lesson.start, clampHourForType(lesson.end, template.type));
+        });
         Object.values(state.weeks).forEach((week) => {
           if (week.templateId === template.id) week.type = template.type;
         });
@@ -2946,7 +2998,7 @@
       if (!lesson) return;
 
       if (field === "start" || field === "end") {
-        lesson[field] = Number(value);
+        lesson[field] = clampHourForType(value, template.type);
         if (lesson.end < lesson.start) lesson.end = lesson.start;
       } else if (field === "teacher") {
         lesson[field] = sanitizeTeacherValue(value);
@@ -3122,8 +3174,8 @@
           ${getSortedLessons(template).map((lesson) => `
             <div class="lesson-edit-row" data-lesson-id="${escapeHtml(lesson.id)}">
               <select class="settings-select" data-lesson-field="day">${getDayOptions(lesson.day)}</select>
-              <select class="settings-select" data-lesson-field="start">${getHourOptions(lesson.start)}</select>
-              <select class="settings-select" data-lesson-field="end">${getHourOptions(lesson.end)}</select>
+              <select class="settings-select" data-lesson-field="start">${getHourOptions(lesson.start, template.type)}</select>
+              <select class="settings-select" data-lesson-field="end">${getHourOptions(lesson.end, template.type)}</select>
               <input class="settings-input" data-lesson-field="subject" value="${escapeHtml(lesson.subject)}" placeholder="Fach">
               <input class="settings-input" data-lesson-field="teacher" value="${escapeHtml(lesson.teacher)}" placeholder="Lehrer">
               <input class="settings-input" data-lesson-field="room" value="${escapeHtml(lesson.room)}" placeholder="Raum">
