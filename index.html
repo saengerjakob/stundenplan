@@ -1780,21 +1780,26 @@
     ];
 
     const savedData = loadData();
+    const initialWeek = getCurrentWeekKey();
+    const initialDay = getCurrentScheduleDayId();
     const state = {
       weeks: savedData.weeks,
-      selectedWeek: savedData.selectedWeek,
+      selectedWeek: initialWeek,
       templates: savedData.templates,
       activeTemplateId: savedData.activeTemplateId,
       teachers: savedData.teachers,
       accounts: savedData.accounts,
       currentUser: savedData.currentUser,
       settingsTab: "calendar",
-      calendarMonth: toMonthKey(parseWeekKey(savedData.selectedWeek)),
+      calendarMonth: toMonthKey(parseWeekKey(initialWeek)),
       selectedCalendarTemplateId: "",
       selectedLessonId: null,
-      scheduleDay: "mo",
-      exportDay: "mo"
+      scheduleDay: initialDay,
+      exportDay: initialDay
     };
+    if (!state.weeks[initialWeek]) {
+      state.weeks[initialWeek] = createWeekData();
+    }
 
     const scheduleShell = document.querySelector(".schedule-shell");
     const weekSelect = document.querySelector("#weekSelect");
@@ -1858,7 +1863,7 @@
         if (data.weeks) {
           return {
             weeks: normalizeWeeks(data.weeks),
-            selectedWeek: data.selectedWeek || currentWeek,
+            selectedWeek: currentWeek,
             templates,
             activeTemplateId,
             teachers,
@@ -1869,7 +1874,7 @@
         if (data.notes) {
           return {
             weeks: createEmptyWeeks(currentWeek, data.notes),
-            selectedWeek: data.selectedWeek || currentWeek,
+            selectedWeek: currentWeek,
             templates,
             activeTemplateId,
             teachers,
@@ -1956,6 +1961,11 @@
 
     function getCurrentWeekKey() {
       return toIsoDateKey(getWeekStartDate());
+    }
+
+    function getCurrentScheduleDayId(date = new Date()) {
+      const dayIndex = (date.getDay() || 7) - 1;
+      return days[dayIndex]?.id || days[0].id;
     }
 
     function formatShortDate(date) {
