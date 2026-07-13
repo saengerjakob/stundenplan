@@ -230,7 +230,7 @@
 
     .schedule {
       width: calc(var(--time-w) + var(--day-w) * var(--day-count));
-      min-height: calc(var(--hour-h) * var(--hour-count));
+      min-height: var(--schedule-h, calc(var(--hour-h) * var(--hour-count)));
       display: grid;
       grid-template-columns: var(--time-w) repeat(var(--day-count), var(--day-w));
       position: relative;
@@ -246,7 +246,7 @@
     }
 
     .hour-slot {
-      height: var(--hour-h);
+      height: var(--slot-h, var(--hour-h));
       position: relative;
       border-bottom: 1px solid var(--line);
       padding: 9px 8px;
@@ -288,6 +288,7 @@
       display: grid;
       grid-template-columns: repeat(var(--day-count), var(--day-w));
       grid-template-rows: repeat(var(--hour-count), var(--hour-h));
+      min-height: var(--schedule-h, calc(var(--hour-h) * var(--hour-count)));
       position: relative;
       background: #141719;
     }
@@ -304,10 +305,10 @@
 
     .lesson {
       position: absolute;
-      left: calc(var(--col) * var(--day-w) + 6px);
-      top: calc((var(--start) - 1) * var(--hour-h) + 6px);
-      width: calc(var(--day-w) - 12px);
-      height: calc(var(--span) * var(--hour-h) - 12px);
+      left: var(--lesson-left, calc(var(--col) * var(--day-w) + 6px));
+      top: var(--lesson-top, calc((var(--start) - 1) * var(--hour-h) + 6px));
+      width: var(--lesson-width, calc(var(--day-w) - 12px));
+      height: var(--lesson-height, calc(var(--span) * var(--hour-h) - 12px));
       min-height: 46px;
       overflow: hidden;
       display: grid;
@@ -370,6 +371,17 @@
       font-size: 16px;
       font-weight: 750;
       line-height: 1.08;
+    }
+
+    .lesson-time {
+      color: rgb(21 29 34 / 0.76);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .lesson.is-done .lesson-time {
+      color: rgb(239 255 249 / 0.82);
     }
 
     .lesson-teacher,
@@ -579,7 +591,8 @@
     }
 
     .btn:disabled,
-    .settings-select:disabled {
+    .settings-select:disabled,
+    .settings-input:disabled {
       cursor: not-allowed;
       opacity: 0.55;
     }
@@ -589,6 +602,10 @@
       color: var(--green);
       font-size: 13px;
       line-height: 1.3;
+    }
+
+    .toast.is-error {
+      color: #ffb8a8;
     }
 
     .day-tabs {
@@ -780,6 +797,10 @@
       color: var(--text);
       padding: 7px 9px;
       font-size: 13px;
+    }
+
+    .settings-input[type="file"] {
+      padding: 7px;
     }
 
     .settings-textarea {
@@ -1115,10 +1136,20 @@
       color: #ffb8a8;
     }
 
+    .pdf-import-box {
+      border: 1px solid #26343c;
+      border-radius: var(--radius);
+      background: #11191d;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
     .template-toolbar,
     .template-editor-head,
     .teacher-toolbar,
-    .account-actions {
+    .account-actions,
+    .pdf-import-actions {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1145,7 +1176,8 @@
 
     .template-form-grid,
     .account-form-grid,
-    .day-entry-form-grid {
+    .day-entry-form-grid,
+    .pdf-import-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
@@ -1154,7 +1186,8 @@
 
     .template-form-grid .wide,
     .account-form-grid .wide,
-    .day-entry-form-grid .wide {
+    .day-entry-form-grid .wide,
+    .pdf-import-grid .wide {
       grid-column: 1 / -1;
     }
 
@@ -1164,6 +1197,10 @@
       gap: 6px;
       align-items: center;
       padding: 8px;
+    }
+
+    .lesson-edit-row.is-time {
+      grid-template-columns: 88px 76px 76px minmax(110px, 1fr) minmax(110px, 1fr) minmax(90px, 1fr) 34px;
     }
 
     .teacher-row {
@@ -1315,6 +1352,7 @@
       .template-form-grid,
       .account-form-grid,
       .day-entry-form-grid,
+      .pdf-import-grid,
       .day-entry-grid {
         grid-template-columns: 1fr;
       }
@@ -1573,6 +1611,7 @@
       </div>
       <div class="settings-tabs" role="tablist" aria-label="Einstellungen">
         <button class="settings-tab is-selected" id="settingsTabCalendar" type="button" role="tab" aria-selected="true" data-settings-tab="calendar">Kalender</button>
+        <button class="settings-tab" id="settingsTabPdf" type="button" role="tab" aria-selected="false" data-settings-tab="pdf">PDF-Import</button>
         <button class="settings-tab" id="settingsTabBlocks" type="button" role="tab" aria-selected="false" data-settings-tab="blocks">Blöcke</button>
         <button class="settings-tab" id="settingsTabTeachers" type="button" role="tab" aria-selected="false" data-settings-tab="teachers">Lehrer</button>
         <button class="settings-tab" id="settingsTabAccount" type="button" role="tab" aria-selected="false" data-settings-tab="account">Konto</button>
@@ -1601,6 +1640,11 @@
             </div>
             <div class="week-settings-list" id="weekSettingsList"></div>
           </div>
+        </section>
+        <section class="settings-panel" id="settingsPanelPdf" role="tabpanel" aria-labelledby="settingsTabPdf" data-settings-panel="pdf">
+          <h3>MAK-PDF importieren</h3>
+          <p class="settings-hint">Lade den Wochenplan der Medienakademie hoch. Aus der Tabelle werden Titel, Start, Ende, Trainerkürzel und Räume als eigener MAK-Block für die gewählte Woche übernommen.</p>
+          <div class="pdf-import-box" id="pdfImportPanel"></div>
         </section>
         <section class="settings-panel" id="settingsPanelBlocks" role="tabpanel" aria-labelledby="settingsTabBlocks" data-settings-panel="blocks">
           <div class="template-toolbar">
@@ -1639,6 +1683,10 @@
     const INTRO_KEY = "gmg10c_bepo_intro_seen_v1";
     const PLAN_ID = "gmg10c";
     const FIREBASE_SDK_VERSION = "10.12.5";
+    const PDFJS_CDN_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@5.6.205/build/pdf.mjs";
+    const PDFJS_WORKER_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@5.6.205/build/pdf.worker.mjs";
+    const EXACT_TIMELINE_MINUTE_HEIGHT = 1.35;
+    const PDF_TEMPLATE_SOURCE = "mak-pdf";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDWYcL4LhkKw-7NwnByjyHDrBJyuJx_3Ls",
@@ -1795,7 +1843,9 @@
       selectedCalendarTemplateId: "",
       selectedLessonId: null,
       scheduleDay: initialDay,
-      exportDay: initialDay
+      exportDay: initialDay,
+      pdfImportStatus: "",
+      pdfImportIsError: false
     };
     if (!state.weeks[initialWeek]) {
       state.weeks[initialWeek] = createWeekData();
@@ -1837,6 +1887,7 @@
     const weekSettingsList = document.querySelector("#weekSettingsList");
     const templateList = document.querySelector("#templateList");
     const templateEditor = document.querySelector("#templateEditor");
+    const pdfImportPanel = document.querySelector("#pdfImportPanel");
     const addTemplateBtn = document.querySelector("#addTemplateBtn");
     const teacherList = document.querySelector("#teacherList");
     const addTeacherBtn = document.querySelector("#addTeacherBtn");
@@ -1847,6 +1898,7 @@
     let remoteServerTimestamp = null;
     let remoteSaveTimer = null;
     let applyingRemoteData = false;
+    let pdfJsModulePromise = null;
 
     function loadData() {
       const currentWeek = getCurrentWeekKey();
@@ -2045,6 +2097,8 @@
           id: template.id,
           name: String(stored?.name || template.name),
           type: blockTypes[stored?.type] ? stored.type : template.type,
+          timeMode: stored?.timeMode === "time" || template.timeMode === "time" ? "time" : "slots",
+          source: String(stored?.source || template.source || ""),
           lessons: stored ? normalizeLessons(stored.lessons) : normalizeLessons(template.lessons)
         };
       });
@@ -2054,6 +2108,8 @@
           id: String(template.id),
           name: String(template.name || "Stundenplan"),
           type: blockTypes[template.type] ? template.type : "berufsschule",
+          timeMode: template.timeMode === "time" ? "time" : "slots",
+          source: String(template.source || ""),
           lessons: normalizeLessons(template.lessons)
         }));
       return [...normalizedDefaults, ...customTemplates];
@@ -2061,12 +2117,14 @@
 
     function normalizeLessons(lessons) {
       return (Array.isArray(lessons) ? lessons : [])
-        .filter((lesson) => lesson && lesson.day && lesson.start && lesson.end)
+        .filter((lesson) => lesson && lesson.day && (lesson.start || lesson.startTime) && (lesson.end || lesson.endTime))
         .map((lesson) => ({
           id: String(lesson.id || makeLessonId(lesson)),
           day: days.some((day) => day.id === lesson.day) ? lesson.day : "mo",
           start: Math.min(12, Math.max(1, Number(lesson.start) || 1)),
           end: Math.min(12, Math.max(1, Number(lesson.end) || Number(lesson.start) || 1)),
+          startTime: normalizeTimeValue(lesson.startTime),
+          endTime: normalizeTimeValue(lesson.endTime),
           subject: String(lesson.subject || "Fach"),
           teacher: sanitizeTeacherValue(lesson.teacher),
           room: String(lesson.room || ""),
@@ -2076,6 +2134,22 @@
           ...lesson,
           end: Math.max(lesson.start, lesson.end)
         }));
+    }
+
+    function normalizeTimeValue(value) {
+      const match = String(value || "").trim().match(/^(\d{1,2})[:.](\d{2})$/);
+      if (!match) return "";
+      const hours = Math.min(23, Math.max(0, Number(match[1]) || 0));
+      const minutes = Math.min(59, Math.max(0, Number(match[2]) || 0));
+      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+    }
+
+    function hasExactTime(lesson) {
+      return Boolean(normalizeTimeValue(lesson?.startTime) && normalizeTimeValue(lesson?.endTime));
+    }
+
+    function templateUsesExactTime(template) {
+      return template?.timeMode === "time" || (template?.lessons || []).some(hasExactTime);
     }
 
     function sanitizeTeacherValue(value) {
@@ -2241,6 +2315,88 @@
       return getHoursForType(getActiveTemplate()?.type);
     }
 
+    function getLessonStartMinutes(lesson) {
+      if (hasExactTime(lesson)) return timeToMinutes(lesson.startTime);
+      const hours = getHoursForType(getActiveTemplate()?.type);
+      const hour = hours.find((item) => item.nr === Number(lesson.start)) || hours[0];
+      return timeToMinutes(hour?.time || "07:45");
+    }
+
+    function getLessonEndMinutes(lesson) {
+      if (hasExactTime(lesson)) return timeToMinutes(lesson.endTime);
+      const hours = getHoursForType(getActiveTemplate()?.type);
+      const hour = hours.find((item) => item.nr === Number(lesson.end)) || hours.at(-1);
+      const start = timeToMinutes(hour?.time || "07:45");
+      return timeToMinutes(hour?.endTime || minutesToTime(start + 45));
+    }
+
+    function getSlotIndexFromTime(time, type = "mak") {
+      const minutes = timeToMinutes(time);
+      const hours = getHoursForType(type);
+      let slot = 1;
+      hours.forEach((hour) => {
+        if (timeToMinutes(hour.time) <= minutes) slot = hour.nr;
+      });
+      return Math.min(hours.at(-1)?.nr || 12, Math.max(1, slot));
+    }
+
+    function getActiveTimeline() {
+      const template = getActiveTemplate();
+      if (template && templateUsesExactTime(template)) {
+        const ranges = getActiveLessons()
+          .filter(hasExactTime)
+          .map((lesson) => ({
+            start: timeToMinutes(lesson.startTime),
+            end: timeToMinutes(lesson.endTime)
+          }))
+          .filter((range) => range.end > range.start);
+        const startMinute = ranges.length ? Math.min(...ranges.map((range) => range.start)) : 8 * 60;
+        const endMinute = ranges.length ? Math.max(...ranges.map((range) => range.end)) : 16 * 60;
+        const boundaries = new Set([startMinute, endMinute]);
+        ranges.forEach((range) => {
+          boundaries.add(range.start);
+          boundaries.add(range.end);
+        });
+        for (let minute = Math.ceil(startMinute / 60) * 60; minute < endMinute; minute += 60) {
+          boundaries.add(minute);
+        }
+        const sortedBoundaries = Array.from(boundaries).sort((a, b) => a - b);
+        const slots = sortedBoundaries.slice(0, -1)
+          .map((start, index) => ({
+            nr: index + 1,
+            time: minutesToTime(start),
+            endTime: minutesToTime(sortedBoundaries[index + 1]),
+            duration: sortedBoundaries[index + 1] - start,
+            height: (sortedBoundaries[index + 1] - start) * EXACT_TIMELINE_MINUTE_HEIGHT
+          }))
+          .filter((slot) => slot.duration > 0);
+        const height = slots.reduce((sum, slot) => sum + slot.height, 0);
+        return {
+          mode: "time",
+          slots,
+          startMinute,
+          endMinute,
+          minuteHeight: EXACT_TIMELINE_MINUTE_HEIGHT,
+          height: Math.max(360, height)
+        };
+      }
+
+      const slots = getActiveHours().map((hour) => ({
+        ...hour,
+        endTime: hour.endTime || minutesToTime(timeToMinutes(hour.time) + 45),
+        duration: 45,
+        height: Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hour-h")) || 78
+      }));
+      return {
+        mode: "slots",
+        slots,
+        startMinute: timeToMinutes(slots[0]?.time || "07:45"),
+        endMinute: timeToMinutes(slots.at(-1)?.endTime || "16:45"),
+        minuteHeight: 0,
+        height: slots.length * (Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hour-h")) || 78)
+      };
+    }
+
     function renderAfterScheduleChange() {
       if (state.selectedLessonId && !getLesson(state.selectedLessonId)) {
         state.selectedLessonId = null;
@@ -2375,20 +2531,37 @@
 
       document.documentElement.style.setProperty("--day-count", String(visibleDays.length));
       document.documentElement.style.setProperty("--day-w", `${dayWidth}px`);
+      return dayWidth;
     }
 
     function timeToMinutes(value) {
-      const [hoursPart, minutesPart] = value.split(":").map(Number);
+      const normalized = normalizeTimeValue(value);
+      if (!normalized) return 0;
+      const [hoursPart, minutesPart] = normalized.split(":").map(Number);
       return hoursPart * 60 + minutesPart;
+    }
+
+    function minutesToTime(minutes) {
+      const safeMinutes = Math.max(0, Math.round(minutes));
+      const hours = Math.floor(safeMinutes / 60);
+      const rest = safeMinutes % 60;
+      return `${String(hours).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
     }
 
     function formatTime(date) {
       return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
     }
 
-    function getCurrentTimePosition(date = new Date()) {
+    function getCurrentTimeOffset(date = new Date()) {
+      if (state.selectedWeek !== getCurrentWeekKey()) return null;
       const nowMinutes = date.getHours() * 60 + date.getMinutes();
-      const activeHours = getActiveHours();
+      const timeline = getActiveTimeline();
+      if (timeline.mode === "time") {
+        if (nowMinutes < timeline.startMinute || nowMinutes > timeline.endMinute) return null;
+        return (nowMinutes - timeline.startMinute) * timeline.minuteHeight;
+      }
+
+      const activeHours = timeline.slots;
       const starts = activeHours.map((hour) => timeToMinutes(hour.time));
       const firstStart = starts[0];
       const lastHour = activeHours.at(-1);
@@ -2402,27 +2575,28 @@
         const nextStart = starts[index + 1];
 
         if (nowMinutes >= start && nowMinutes <= end) {
-          return index + ((nowMinutes - start) / 45);
+          const hourHeight = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hour-h")) || 78;
+          return (index + ((nowMinutes - start) / 45)) * hourHeight;
         }
 
         if (nextStart && nowMinutes > end && nowMinutes < nextStart) {
-          return index + 1;
+          const hourHeight = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hour-h")) || 78;
+          return (index + 1) * hourHeight;
         }
       }
 
-      return activeHours.length;
+      const hourHeight = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hour-h")) || 78;
+      return activeHours.length * hourHeight;
     }
 
     function updateNowLine() {
-      const position = getCurrentTimePosition();
-      if (position === null) {
+      const offset = getCurrentTimeOffset();
+      if (offset === null) {
         nowLine.classList.remove("is-visible");
         return;
       }
 
-      const hourHeight = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hour-h")) || 54;
-      const y = position * hourHeight;
-      nowLine.style.setProperty("--now-y", `${y}px`);
+      nowLine.style.setProperty("--now-y", `${offset}px`);
       nowLine.dataset.time = formatTime(new Date());
       nowLine.classList.add("is-visible");
     }
@@ -2468,6 +2642,7 @@
     }
 
     function hourLabel(lesson) {
+      if (hasExactTime(lesson)) return `${normalizeTimeValue(lesson.startTime)} - ${normalizeTimeValue(lesson.endTime)}`;
       if (lesson.start === lesson.end) return `${lesson.start}. Stunde`;
       if (lesson.end === lesson.start + 1) return `${lesson.start}. und ${lesson.end}. Stunde`;
       return `${lesson.start}. bis ${lesson.end}. Stunde`;
@@ -2475,16 +2650,23 @@
 
     function renderTimeAxis() {
       timeAxis.innerHTML = "";
-      const activeHours = getActiveHours();
-      document.documentElement.style.setProperty("--hour-count", String(activeHours.length));
-      activeHours.forEach((hour) => {
+      const timeline = getActiveTimeline();
+      document.documentElement.style.setProperty("--hour-count", String(timeline.slots.length));
+      document.documentElement.style.setProperty("--schedule-h", `${timeline.height}px`);
+      timeline.slots.forEach((hour) => {
         const slot = document.createElement("div");
         slot.className = `hour-slot${hour.breakBefore ? " break-before" : ""}`;
-        slot.innerHTML = `
-          <span class="hour-time">${hour.time}</span>
-          <span class="hour-num">${hour.nr}.</span>
-          ${hour.endTime ? `<span class="hour-end-time">${hour.endTime}</span>` : ""}
-        `;
+        slot.style.setProperty("--slot-h", `${hour.height}px`);
+        slot.innerHTML = timeline.mode === "time"
+          ? `
+            <span class="hour-time">${hour.time}</span>
+            <span class="hour-end-time">${hour.endTime}</span>
+          `
+          : `
+            <span class="hour-time">${hour.time}</span>
+            <span class="hour-num">${hour.nr}.</span>
+            ${hour.endTime ? `<span class="hour-end-time">${hour.endTime}</span>` : ""}
+          `;
         timeAxis.append(slot);
       });
     }
@@ -2509,14 +2691,86 @@
       });
     }
 
+    function getLessonTimeText(lesson) {
+      return hasExactTime(lesson) ? `${normalizeTimeValue(lesson.startTime)} - ${normalizeTimeValue(lesson.endTime)}` : "";
+    }
+
+    function getLessonLayoutMap(lessons, visibleDays, dayWidth, timeline) {
+      const layoutMap = new Map();
+      const hourHeight = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hour-h")) || 78;
+
+      visibleDays.forEach((day, dayColumn) => {
+        const dayLessons = lessons
+          .filter((lesson) => lesson.day === day.id)
+          .map((lesson) => ({
+            lesson,
+            start: getLessonStartMinutes(lesson),
+            end: Math.max(getLessonStartMinutes(lesson) + 1, getLessonEndMinutes(lesson))
+          }))
+          .sort((a, b) => a.start - b.start || a.end - b.end);
+
+        const groups = [];
+        let currentGroup = [];
+        let currentEnd = -Infinity;
+        dayLessons.forEach((item) => {
+          if (!currentGroup.length || item.start < currentEnd) {
+            currentGroup.push(item);
+            currentEnd = Math.max(currentEnd, item.end);
+            return;
+          }
+          groups.push(currentGroup);
+          currentGroup = [item];
+          currentEnd = item.end;
+        });
+        if (currentGroup.length) groups.push(currentGroup);
+
+        groups.forEach((group) => {
+          const columns = [];
+          group.forEach((item) => {
+            let columnIndex = columns.findIndex((end) => end <= item.start);
+            if (columnIndex < 0) {
+              columnIndex = columns.length;
+              columns.push(item.end);
+            } else {
+              columns[columnIndex] = item.end;
+            }
+            item.columnIndex = columnIndex;
+          });
+
+          const columnCount = Math.max(1, columns.length);
+          const availableWidth = Math.max(46, dayWidth - 12);
+          const laneWidth = availableWidth / columnCount;
+
+          group.forEach((item) => {
+            const top = timeline.mode === "time"
+              ? (item.start - timeline.startMinute) * timeline.minuteHeight + 6
+              : (Number(item.lesson.start) - 1) * hourHeight + 6;
+            const height = timeline.mode === "time"
+              ? Math.max(46, (item.end - item.start) * timeline.minuteHeight - 12)
+              : Math.max(46, (Number(item.lesson.end) - Number(item.lesson.start) + 1) * hourHeight - 12);
+            layoutMap.set(item.lesson.id, {
+              left: dayColumn * dayWidth + 6 + item.columnIndex * laneWidth,
+              width: Math.max(42, laneWidth - (columnCount > 1 ? 6 : 0)),
+              top,
+              height
+            });
+          });
+        });
+      });
+
+      return layoutMap;
+    }
+
     function renderGrid() {
       gridArea.innerHTML = "";
-      updateScheduleLayout();
+      const dayWidth = updateScheduleLayout();
       const visibleDays = getVisibleDays();
-      const activeHours = getActiveHours();
-      document.documentElement.style.setProperty("--hour-count", String(activeHours.length));
+      const timeline = getActiveTimeline();
+      document.documentElement.style.setProperty("--hour-count", String(timeline.slots.length));
+      document.documentElement.style.setProperty("--schedule-h", `${timeline.height}px`);
+      gridArea.style.gridTemplateRows = timeline.slots.map((slot) => `${slot.height}px`).join(" ");
 
-      activeHours.forEach((hour) => {
+      timeline.slots.forEach((hour) => {
         for (let dayIndex = 0; dayIndex < visibleDays.length; dayIndex += 1) {
           const line = document.createElement("div");
           line.className = `grid-line${hour.breakBefore ? " break-before" : ""}`;
@@ -2530,12 +2784,15 @@
         return;
       }
 
+      const layoutMap = getLessonLayoutMap(getActiveLessons(), visibleDays, dayWidth, timeline);
       getActiveLessons().forEach((lesson) => {
         const entry = getEntry(lesson.id);
         const button = document.createElement("button");
         const col = visibleDays.findIndex((day) => day.id === lesson.day);
         if (col < 0) return;
         const displayTeacher = getDisplayTeacherAbbreviation(lesson);
+        const timeText = getLessonTimeText(lesson);
+        const layout = layoutMap.get(lesson.id);
         button.className = "lesson";
         if (lesson.id === state.selectedLessonId) button.classList.add("is-active");
         if (entry.text) button.classList.add("has-text");
@@ -2544,9 +2801,16 @@
         button.style.setProperty("--col", col);
         button.style.setProperty("--start", lesson.start);
         button.style.setProperty("--span", lesson.end - lesson.start + 1);
+        if (layout) {
+          button.style.setProperty("--lesson-left", `${layout.left}px`);
+          button.style.setProperty("--lesson-width", `${layout.width}px`);
+          button.style.setProperty("--lesson-top", `${layout.top}px`);
+          button.style.setProperty("--lesson-height", `${layout.height}px`);
+        }
         button.type = "button";
         button.setAttribute("aria-label", `${hourLabel(lesson)} ${lesson.subject} ${displayTeacher}`);
         button.innerHTML = `
+          ${timeText ? `<span class="lesson-time">${escapeHtml(timeText)}</span>` : ""}
           <span class="lesson-subject">${escapeHtml(lesson.subject)}</span>
           <span class="lesson-teacher">${escapeHtml(displayTeacher)}</span>
           <span class="lesson-room">${escapeHtml(lesson.room)}</span>
@@ -2790,7 +3054,7 @@
       }
       return getActiveLessons()
         .filter((lesson) => lesson.day === dayId)
-        .sort((a, b) => a.start - b.start)
+        .sort((a, b) => getLessonSortMinutes(a) - getLessonSortMinutes(b) || getLessonSortEndMinutes(a) - getLessonSortEndMinutes(b))
         .map((lesson) => {
           const entry = getEntry(lesson.id);
           if (!entry.text) return "";
@@ -2889,9 +3153,17 @@
     function getSortedLessons(template) {
       return [...(template?.lessons || [])].sort((a, b) => (
         days.findIndex((day) => day.id === a.day) - days.findIndex((day) => day.id === b.day)
-        || a.start - b.start
-        || a.end - b.end
+        || getLessonSortMinutes(a) - getLessonSortMinutes(b)
+        || getLessonSortEndMinutes(a) - getLessonSortEndMinutes(b)
       ));
+    }
+
+    function getLessonSortMinutes(lesson) {
+      return hasExactTime(lesson) ? timeToMinutes(lesson.startTime) : Number(lesson.start) * 60;
+    }
+
+    function getLessonSortEndMinutes(lesson) {
+      return hasExactTime(lesson) ? timeToMinutes(lesson.endTime) : Number(lesson.end) * 60;
     }
 
     function clampHourForType(value, type) {
@@ -2960,6 +3232,8 @@
         id: makeTemplateId(),
         name: source?.type === "mak" ? "Neuer MAK-Block" : "Neuer Berufsschulblock",
         type: source.type,
+        timeMode: source?.timeMode === "time" ? "time" : "slots",
+        source: "",
         lessons: []
       };
       state.templates.push(template);
@@ -3010,6 +3284,13 @@
       if (field === "start" || field === "end") {
         lesson[field] = clampHourForType(value, template.type);
         if (lesson.end < lesson.start) lesson.end = lesson.start;
+      } else if (field === "startTime" || field === "endTime") {
+        const normalizedTime = normalizeTimeValue(value);
+        if (normalizedTime) {
+          lesson[field] = normalizedTime;
+          lesson.start = getSlotIndexFromTime(lesson.startTime || normalizedTime, template.type);
+          lesson.end = Math.max(lesson.start, getSlotIndexFromTime(lesson.endTime || normalizedTime, template.type));
+        }
       } else if (field === "teacher") {
         lesson[field] = sanitizeTeacherValue(value);
         syncTeachersFromTemplates();
@@ -3024,11 +3305,14 @@
     function addLessonToActiveTemplate() {
       const template = getTemplateById(state.activeTemplateId);
       if (!template) return;
+      const isTimeTemplate = templateUsesExactTime(template);
       const lesson = {
         id: makeLessonId({ day: "mo", start: 1, end: 1, subject: "Fach" }),
         day: "mo",
         start: 1,
         end: 1,
+        startTime: isTimeTemplate ? "08:30" : "",
+        endTime: isTimeTemplate ? "09:15" : "",
         subject: "Fach",
         teacher: "",
         room: ""
@@ -3165,6 +3449,7 @@
       }
 
       const isDefaultTemplate = defaultTemplates.some((item) => item.id === template.id);
+      const usesExactTime = templateUsesExactTime(template);
       templateEditor.innerHTML = `
         <div class="template-editor-head">
           <h3>${escapeHtml(template.name)}</h3>
@@ -3182,10 +3467,17 @@
         </div>
         <div class="lesson-editor-list" id="lessonEditorList">
           ${getSortedLessons(template).map((lesson) => `
-            <div class="lesson-edit-row" data-lesson-id="${escapeHtml(lesson.id)}">
+            <div class="lesson-edit-row${usesExactTime ? " is-time" : ""}" data-lesson-id="${escapeHtml(lesson.id)}">
               <select class="settings-select" data-lesson-field="day">${getDayOptions(lesson.day)}</select>
-              <select class="settings-select" data-lesson-field="start">${getHourOptions(lesson.start, template.type)}</select>
-              <select class="settings-select" data-lesson-field="end">${getHourOptions(lesson.end, template.type)}</select>
+              ${usesExactTime
+                ? `
+                  <input class="settings-input" data-lesson-field="startTime" value="${escapeHtml(lesson.startTime || "")}" placeholder="Start">
+                  <input class="settings-input" data-lesson-field="endTime" value="${escapeHtml(lesson.endTime || "")}" placeholder="Ende">
+                `
+                : `
+                  <select class="settings-select" data-lesson-field="start">${getHourOptions(lesson.start, template.type)}</select>
+                  <select class="settings-select" data-lesson-field="end">${getHourOptions(lesson.end, template.type)}</select>
+                `}
               <input class="settings-input" data-lesson-field="subject" value="${escapeHtml(lesson.subject)}" placeholder="Fach">
               <input class="settings-input" data-lesson-field="teacher" value="${escapeHtml(lesson.teacher)}" placeholder="Lehrer">
               <input class="settings-input" data-lesson-field="room" value="${escapeHtml(lesson.room)}" placeholder="Raum">
@@ -3400,10 +3692,348 @@
       });
     }
 
+    function renderPdfImportSettings() {
+      if (!pdfImportPanel) return;
+      const weekOptions = getPdfImportWeekKeys()
+        .map((weekKey) => `<option value="${escapeHtml(weekKey)}" ${weekKey === state.selectedWeek ? "selected" : ""}>${escapeHtml(formatWeekLabel(weekKey))}</option>`)
+        .join("");
+      pdfImportPanel.innerHTML = `
+        <div class="pdf-import-grid">
+          <label>
+            <span class="field-label">Woche</span>
+            <select class="settings-select" id="pdfImportWeekSelect">${weekOptions}</select>
+          </label>
+          <label>
+            <span class="field-label">Stundenplan-PDF</span>
+            <input class="settings-input" id="pdfImportFile" type="file" accept="application/pdf">
+          </label>
+        </div>
+        <div class="pdf-import-actions">
+          <button class="btn primary" id="pdfImportBtn" type="button">PDF importieren</button>
+        </div>
+        <div class="toast${state.pdfImportIsError ? " is-error" : ""}" id="pdfImportStatus" aria-live="polite">${escapeHtml(state.pdfImportStatus)}</div>
+      `;
+      document.querySelector("#pdfImportBtn").addEventListener("click", handlePdfImport);
+    }
+
+    function getPdfImportWeekKeys() {
+      const keys = new Set([...getSelectableWeekKeys(), ...getCalendarWeekKeys()]);
+      keys.add(state.selectedWeek);
+      return Array.from(keys).filter(Boolean).sort();
+    }
+
+    function setPdfImportStatus(message, isError = false) {
+      state.pdfImportStatus = message;
+      state.pdfImportIsError = isError;
+      const status = document.querySelector("#pdfImportStatus");
+      if (status) {
+        status.textContent = message;
+        status.classList.toggle("is-error", isError);
+      }
+    }
+
+    async function handlePdfImport() {
+      const weekSelectInput = document.querySelector("#pdfImportWeekSelect");
+      const fileInput = document.querySelector("#pdfImportFile");
+      const importButton = document.querySelector("#pdfImportBtn");
+      const file = fileInput?.files?.[0];
+      if (!file) {
+        setPdfImportStatus("Bitte zuerst eine PDF-Datei auswählen.", true);
+        return;
+      }
+
+      importButton.disabled = true;
+      setPdfImportStatus("PDF wird gelesen ...");
+      try {
+        const parsed = await parseMakPdfFile(file);
+        const targetWeekKey = weekSelectInput?.value || parsed.weekKey || state.selectedWeek;
+        const template = createPdfTemplateFromParsedSchedule(parsed, targetWeekKey, file.name);
+        applyPdfTemplateToWeek(targetWeekKey, template);
+        const mismatchNote = parsed.weekKey && parsed.weekKey !== targetWeekKey
+          ? ` PDF enthielt ${formatWeekLabel(parsed.weekKey)}.`
+          : "";
+        state.pdfImportStatus = `${template.lessons.length} Einheiten importiert und als MAK-Block für ${formatWeekLabel(targetWeekKey)} eingetragen.${mismatchNote}`;
+        state.pdfImportIsError = false;
+        renderAfterScheduleChange();
+      } catch (error) {
+        console.error(error);
+        setPdfImportStatus(error?.message || "Die PDF konnte nicht gelesen werden.", true);
+      } finally {
+        if (document.body.contains(importButton)) importButton.disabled = false;
+      }
+    }
+
+    async function loadPdfJsModule() {
+      if (!pdfJsModulePromise) {
+        pdfJsModulePromise = import(PDFJS_CDN_URL).then((module) => {
+          module.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_URL;
+          return module;
+        });
+      }
+      return pdfJsModulePromise;
+    }
+
+    async function parseMakPdfFile(file) {
+      const pdfjsLib = await loadPdfJsModule();
+      const data = new Uint8Array(await file.arrayBuffer());
+      const pdf = await pdfjsLib.getDocument({ data, disableWorker: true }).promise;
+      const parsedLessons = [];
+
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        const page = await pdf.getPage(pageNumber);
+        const viewport = page.getViewport({ scale: 1 });
+        const textContent = await page.getTextContent();
+        const words = pdfTextItemsToWords(textContent.items, viewport.height);
+        const rows = groupPdfWordsIntoRows(words);
+        const columns = findPdfTableColumns(rows);
+        if (!columns) continue;
+        parsedLessons.push(...parsePdfScheduleRows(rows, columns));
+      }
+
+      if (!parsedLessons.length) {
+        throw new Error("Keine Termine in der PDF gefunden. Erwartet wird die MAK-Tabelle mit Anfangstermin, Endtermin, Trainer und Räumen.");
+      }
+
+      const firstDate = parsedLessons
+        .map((lesson) => lesson.startDate)
+        .filter(Boolean)
+        .sort((a, b) => a - b)[0];
+      return {
+        lessons: parsedLessons,
+        weekKey: firstDate ? toIsoDateKey(getWeekStartDate(firstDate)) : ""
+      };
+    }
+
+    function pdfTextItemsToWords(items, pageHeight) {
+      return (items || []).flatMap((item) => {
+        const text = String(item.str || "").replace(/\u00a0/g, " ");
+        const matches = Array.from(text.matchAll(/\S+/g));
+        if (!matches.length) return [];
+        const transform = item.transform || [1, 0, 0, 1, 0, 0];
+        const itemX = Number(transform[4]) || 0;
+        const itemY = Number(transform[5]) || 0;
+        const itemWidth = Number(item.width) || Math.max(1, text.length * 5);
+        const itemHeight = Math.abs(Number(transform[3]) || Number(item.height) || 10);
+        const top = pageHeight - itemY - itemHeight;
+        const charWidth = itemWidth / Math.max(1, text.length);
+        return matches.map((match) => {
+          const word = match[0];
+          const x0 = itemX + match.index * charWidth;
+          return {
+            text: word,
+            x0,
+            x1: x0 + word.length * charWidth,
+            top,
+            bottom: top + itemHeight
+          };
+        });
+      });
+    }
+
+    function groupPdfWordsIntoRows(words) {
+      const rows = [];
+      [...words]
+        .filter((word) => word.text)
+        .sort((a, b) => a.top - b.top || a.x0 - b.x0)
+        .forEach((word) => {
+          const row = rows.find((item) => Math.abs(item.top - word.top) <= 4);
+          if (row) {
+            row.words.push(word);
+            row.top = Math.min(row.top, word.top);
+            row.bottom = Math.max(row.bottom, word.bottom);
+          } else {
+            rows.push({ top: word.top, bottom: word.bottom, words: [word] });
+          }
+        });
+      rows.forEach((row) => {
+        row.words.sort((a, b) => a.x0 - b.x0);
+        row.text = row.words.map((word) => word.text).join(" ");
+      });
+      return rows.sort((a, b) => a.top - b.top);
+    }
+
+    function findPdfTableColumns(rows) {
+      const header = rows.find((row) => /Anfangstermin/i.test(row.text) && /Endtermin/i.test(row.text) && /Trainer/i.test(row.text));
+      if (!header) return null;
+      const findX = (pattern, fallback) => header.words.find((word) => pattern.test(word.text))?.x0 ?? fallback;
+      return {
+        headerTop: header.top,
+        title: findX(/^Titel$/i, 120),
+        start: findX(/^Anfangstermin$/i, 328),
+        end: findX(/^Endtermin$/i, 421),
+        trainer: findX(/^Trainer$/i, 516),
+        room: findX(/^R(?:\u00e4|ae)ume$/i, 575),
+        remarks: findX(/^Bemerkungen$/i, 657)
+      };
+    }
+
+    function parsePdfScheduleRows(rows, columns) {
+      const lessons = [];
+      const pending = { title: [], trainer: [], room: [] };
+
+      rows.forEach((row) => {
+        if (row.top <= columns.headerTop + 6) return;
+        const cells = splitPdfRowIntoCells(row, columns);
+        const start = parsePdfDateTime(cells.start);
+        const end = parsePdfDateTime(cells.end);
+        const isMainRow = start && end && (cells.title || pending.title.length);
+
+        if (isMainRow) {
+          const title = stripScheduleTitle([...pending.title, cells.title].filter(Boolean).join(" "));
+          lessons.push({
+            title: title || "MAK-Einheit",
+            startDate: start.date,
+            endDate: end.date,
+            startTime: start.time,
+            endTime: end.time,
+            trainer: normalizePdfList([...pending.trainer, cells.trainer].filter(Boolean).join(" ")),
+            room: normalizePdfList([...pending.room, cells.room].filter(Boolean).join(" "))
+          });
+          pending.title = [];
+          pending.trainer = [];
+          pending.room = [];
+          return;
+        }
+
+        if (/^(BKZ|Wochentag|Zust\u00e4ndiger|Seite|\d+\s+Sch\u00fcler)/i.test(row.text)) return;
+        if (cells.title) pending.title.push(cells.title);
+        if (cells.trainer) pending.trainer.push(cells.trainer);
+        if (cells.room) pending.room.push(cells.room);
+      });
+
+      return lessons;
+    }
+
+    function splitPdfRowIntoCells(row, columns) {
+      return {
+        title: getPdfCellText(row, columns.title - 6, columns.start - 8),
+        start: getPdfCellText(row, columns.start - 10, columns.end - 8),
+        end: getPdfCellText(row, columns.end - 10, columns.trainer - 8),
+        trainer: getPdfCellText(row, columns.trainer - 8, columns.room - 6),
+        room: getPdfCellText(row, columns.room - 8, columns.remarks - 6)
+      };
+    }
+
+    function getPdfCellText(row, left, right) {
+      return row.words
+        .filter((word) => word.x0 >= left && word.x0 < right)
+        .sort((a, b) => a.x0 - b.x0)
+        .map((word) => word.text)
+        .join(" ")
+        .replace(/\s+([,;:])/g, "$1")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function parsePdfDateTime(value) {
+      const match = String(value || "").match(/(\d{1,2})\.(\d{1,2})\.(\d{4})\s+(\d{1,2})[:.](\d{2})/);
+      if (!match) return null;
+      const day = Number(match[1]);
+      const month = Number(match[2]);
+      const year = Number(match[3]);
+      const time = normalizeTimeValue(`${match[4]}:${match[5]}`);
+      return {
+        date: new Date(year, month - 1, day),
+        time
+      };
+    }
+
+    function stripScheduleTitle(value) {
+      let title = String(value || "")
+        .replace(/\s+([,;:])/g, "$1")
+        .replace(/\s+/g, " ")
+        .trim();
+      const prefixMatch = title.match(/^[A-Z0-9\u00c4\u00d6\u00dc]+-LF\d+[A-Z]?-(.+)$/i);
+      if (prefixMatch) title = prefixMatch[1].trim();
+      return title;
+    }
+
+    function normalizePdfList(value) {
+      return String(value || "")
+        .replace(/[;,]+/g, " ")
+        .split(/\s+/)
+        .map((part) => part.trim().replace(/^[,;]+|[,;]+$/g, ""))
+        .filter(Boolean)
+        .join(" ");
+    }
+
+    function createPdfTemplateFromParsedSchedule(parsed, weekKey, fileName) {
+      const occurrenceCounts = new Map();
+      const lessons = parsed.lessons.map((lesson) => {
+        const dayIndex = (lesson.startDate.getDay() || 7) - 1;
+        const day = days[dayIndex]?.id || "mo";
+        const baseId = [
+          "mak-pdf",
+          toIsoDateKey(lesson.startDate),
+          lesson.startTime.replace(":", ""),
+          lesson.endTime.replace(":", ""),
+          slugify(lesson.title)
+        ].filter(Boolean).join("-");
+        const count = (occurrenceCounts.get(baseId) || 0) + 1;
+        occurrenceCounts.set(baseId, count);
+        const start = getSlotIndexFromTime(lesson.startTime, "mak");
+        const end = Math.max(start, getSlotIndexFromTime(lesson.endTime, "mak"));
+        return {
+          id: `${baseId}-${count}`,
+          day,
+          start,
+          end,
+          startTime: lesson.startTime,
+          endTime: lesson.endTime,
+          subject: lesson.title,
+          teacher: lesson.trainer,
+          room: lesson.room,
+          tone: ""
+        };
+      });
+
+      return {
+        id: `mak-pdf-${weekKey}`,
+        name: `MAK PDF ${formatWeekLabel(weekKey)}`,
+        type: "mak",
+        timeMode: "time",
+        source: PDF_TEMPLATE_SOURCE,
+        sourceFile: String(fileName || ""),
+        lessons
+      };
+    }
+
+    function applyPdfTemplateToWeek(weekKey, template) {
+      ensureWeek(weekKey);
+      const week = getWeekData(weekKey);
+      const previousTemplate = getTemplateById(week.templateId);
+      state.templates = state.templates.filter((item) => (
+        item.id !== template.id
+        && !(previousTemplate?.source === PDF_TEMPLATE_SOURCE && item.id === previousTemplate.id)
+      ));
+      state.templates.push(template);
+      week.type = "mak";
+      week.templateId = template.id;
+      state.activeTemplateId = template.id;
+      state.selectedWeek = weekKey;
+      state.calendarMonth = toMonthKey(parseWeekKey(weekKey));
+      state.scheduleDay = template.lessons[0]?.day || state.scheduleDay;
+      state.exportDay = state.scheduleDay;
+      state.selectedLessonId = template.lessons[0]?.id || null;
+      syncTeachersFromTemplates();
+      saveData();
+    }
+
+    function slugify(value) {
+      return String(value || "einheit")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 48) || "einheit";
+    }
+
     function renderSettings() {
       if (settingsModal.hidden) return;
       setSettingsTabVisuals();
       renderWeekSettings();
+      renderPdfImportSettings();
       renderTemplateSettings();
       renderTeacherSettings();
       renderAccountSettings();
