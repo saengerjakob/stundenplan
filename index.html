@@ -249,9 +249,13 @@
       height: var(--slot-h, var(--hour-h));
       position: relative;
       border-bottom: 1px solid var(--line);
-      padding: 9px 8px;
+      padding: 9px 10px 9px 8px;
       color: #aeb9c0;
       text-align: right;
+    }
+
+    .time-axis[data-mode="time"] .hour-slot {
+      padding: 0 10px 0 6px;
     }
 
     .hour-slot.break-before {
@@ -264,6 +268,17 @@
       line-height: 1;
     }
 
+    .time-axis[data-mode="time"] .hour-time {
+      position: absolute;
+      right: 10px;
+      top: 6px;
+      padding: 0 2px;
+      background: #121619;
+      color: #c3ced5;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
     .hour-end-time {
       position: absolute;
       right: 8px;
@@ -271,6 +286,16 @@
       color: #aeb9c0;
       font-size: 13px;
       line-height: 1;
+    }
+
+    .time-axis[data-mode="time"] .hour-end-time {
+      right: 10px;
+      bottom: 6px;
+      padding: 0 2px;
+      background: #121619;
+      color: #c3ced5;
+      font-size: 12px;
+      font-weight: 700;
     }
 
     .hour-num {
@@ -323,6 +348,11 @@
       outline: 0;
     }
 
+    .lesson.is-compact {
+      gap: 2px;
+      padding: 8px 10px 8px 16px;
+    }
+
     .lesson::before {
       content: "";
       position: absolute;
@@ -373,11 +403,20 @@
       line-height: 1.08;
     }
 
+    .lesson.is-compact .lesson-subject {
+      font-size: 13px;
+      line-height: 1.12;
+    }
+
     .lesson-time {
       color: rgb(21 29 34 / 0.76);
       font-size: 12px;
       font-weight: 800;
       line-height: 1;
+    }
+
+    .lesson.is-compact .lesson-time {
+      font-size: 11px;
     }
 
     .lesson.is-done .lesson-time {
@@ -390,6 +429,11 @@
       overflow-wrap: anywhere;
       font-size: 14px;
       line-height: 1.12;
+    }
+
+    .lesson.is-compact .lesson-teacher,
+    .lesson.is-compact .lesson-room {
+      display: none;
     }
 
     .lesson-note-dot {
@@ -438,13 +482,18 @@
     .now-line::before {
       content: attr(data-time);
       position: absolute;
-      left: -58px;
-      top: -11px;
-      width: 50px;
+      left: 8px;
+      top: -22px;
+      width: auto;
+      min-width: 44px;
+      border: 1px solid rgb(255 113 77 / 0.45);
+      border-radius: 999px;
+      padding: 2px 6px;
+      background: #241815;
       color: #ff9a7d;
       font-size: 12px;
       font-weight: 700;
-      text-align: right;
+      text-align: center;
     }
 
     .side {
@@ -1685,7 +1734,7 @@
     const FIREBASE_SDK_VERSION = "10.12.5";
     const PDFJS_CDN_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@5.6.205/build/pdf.mjs";
     const PDFJS_WORKER_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@5.6.205/build/pdf.worker.mjs";
-    const EXACT_TIMELINE_MINUTE_HEIGHT = 1.35;
+    const EXACT_TIMELINE_MINUTE_HEIGHT = 1.45;
     const PDF_TEMPLATE_SOURCE = "mak-pdf";
 
     const firebaseConfig = {
@@ -2093,26 +2142,36 @@
       const storedTemplates = Array.isArray(templates) ? templates : [];
       const normalizedDefaults = defaultTemplates.map((template) => {
         const stored = storedTemplates.find((item) => item && item.id === template.id);
+        const source = String(stored?.source || template.source || "");
         return {
           id: template.id,
           name: String(stored?.name || template.name),
           type: blockTypes[stored?.type] ? stored.type : template.type,
           timeMode: stored?.timeMode === "time" || template.timeMode === "time" ? "time" : "slots",
-          source: String(stored?.source || template.source || ""),
-          lessons: stored ? normalizeLessons(stored.lessons) : normalizeLessons(template.lessons)
+          source,
+          lessons: normalizeTemplateLessons(stored ? stored.lessons : template.lessons, source)
         };
       });
       const customTemplates = storedTemplates
         .filter((template) => template && template.id && !defaultTemplates.some((item) => item.id === template.id))
-        .map((template) => ({
-          id: String(template.id),
-          name: String(template.name || "Stundenplan"),
-          type: blockTypes[template.type] ? template.type : "berufsschule",
-          timeMode: template.timeMode === "time" ? "time" : "slots",
-          source: String(template.source || ""),
-          lessons: normalizeLessons(template.lessons)
-        }));
+        .map((template) => {
+          const source = String(template.source || "");
+          return {
+            id: String(template.id),
+            name: String(template.name || "Stundenplan"),
+            type: blockTypes[template.type] ? template.type : "berufsschule",
+            timeMode: template.timeMode === "time" ? "time" : "slots",
+            source,
+            lessons: normalizeTemplateLessons(template.lessons, source)
+          };
+        });
       return [...normalizedDefaults, ...customTemplates];
+    }
+
+    function normalizeTemplateLessons(lessons, source = "") {
+      const normalized = normalizeLessons(lessons);
+      if (source !== PDF_TEMPLATE_SOURCE) return normalized;
+      return normalized.filter((lesson) => !isIgnoredPdfLessonTitle(lesson.subject));
     }
 
     function normalizeLessons(lessons) {
@@ -2350,17 +2409,14 @@
             end: timeToMinutes(lesson.endTime)
           }))
           .filter((range) => range.end > range.start);
-        const startMinute = ranges.length ? Math.min(...ranges.map((range) => range.start)) : 8 * 60;
-        const endMinute = ranges.length ? Math.max(...ranges.map((range) => range.end)) : 16 * 60;
-        const boundaries = new Set([startMinute, endMinute]);
-        ranges.forEach((range) => {
-          boundaries.add(range.start);
-          boundaries.add(range.end);
-        });
-        for (let minute = Math.ceil(startMinute / 60) * 60; minute < endMinute; minute += 60) {
-          boundaries.add(minute);
+        const firstLessonStart = ranges.length ? Math.min(...ranges.map((range) => range.start)) : 8 * 60;
+        const lastLessonEnd = ranges.length ? Math.max(...ranges.map((range) => range.end)) : 16 * 60;
+        const startMinute = Math.floor(firstLessonStart / 60) * 60;
+        const endMinute = Math.ceil(lastLessonEnd / 60) * 60;
+        const sortedBoundaries = [];
+        for (let minute = startMinute; minute <= endMinute; minute += 60) {
+          sortedBoundaries.push(minute);
         }
-        const sortedBoundaries = Array.from(boundaries).sort((a, b) => a - b);
         const slots = sortedBoundaries.slice(0, -1)
           .map((start, index) => ({
             nr: index + 1,
@@ -2653,14 +2709,15 @@
       const timeline = getActiveTimeline();
       document.documentElement.style.setProperty("--hour-count", String(timeline.slots.length));
       document.documentElement.style.setProperty("--schedule-h", `${timeline.height}px`);
-      timeline.slots.forEach((hour) => {
+      timeAxis.dataset.mode = timeline.mode;
+      timeline.slots.forEach((hour, index) => {
         const slot = document.createElement("div");
         slot.className = `hour-slot${hour.breakBefore ? " break-before" : ""}`;
         slot.style.setProperty("--slot-h", `${hour.height}px`);
         slot.innerHTML = timeline.mode === "time"
           ? `
             <span class="hour-time">${hour.time}</span>
-            <span class="hour-end-time">${hour.endTime}</span>
+            ${index === timeline.slots.length - 1 ? `<span class="hour-end-time">${hour.endTime}</span>` : ""}
           `
           : `
             <span class="hour-time">${hour.time}</span>
@@ -2742,17 +2799,24 @@
           const laneWidth = availableWidth / columnCount;
 
           group.forEach((item) => {
+            const duration = item.end - item.start;
+            const renderedWidth = Math.max(42, laneWidth - (columnCount > 1 ? 6 : 0));
             const top = timeline.mode === "time"
               ? (item.start - timeline.startMinute) * timeline.minuteHeight + 6
               : (Number(item.lesson.start) - 1) * hourHeight + 6;
+            const compact = timeline.mode === "time" && duration <= 45;
+            const charsPerLine = Math.max(10, Math.floor(renderedWidth / (compact ? 7 : 8.5)));
+            const titleLines = Math.max(1, Math.ceil(String(item.lesson.subject || "").length / charsPerLine));
+            const minHeight = compact ? Math.max(58, 30 + titleLines * 15) : 46;
             const height = timeline.mode === "time"
-              ? Math.max(46, (item.end - item.start) * timeline.minuteHeight - 12)
+              ? Math.max(minHeight, duration * timeline.minuteHeight - 12)
               : Math.max(46, (Number(item.lesson.end) - Number(item.lesson.start) + 1) * hourHeight - 12);
             layoutMap.set(item.lesson.id, {
               left: dayColumn * dayWidth + 6 + item.columnIndex * laneWidth,
-              width: Math.max(42, laneWidth - (columnCount > 1 ? 6 : 0)),
+              width: renderedWidth,
               top,
-              height
+              height,
+              compact
             });
           });
         });
@@ -2797,6 +2861,7 @@
         if (lesson.id === state.selectedLessonId) button.classList.add("is-active");
         if (entry.text) button.classList.add("has-text");
         if (entry.text && entry.done) button.classList.add("is-done");
+        if (layout?.compact) button.classList.add("is-compact");
         if (lesson.tone) button.dataset.tone = lesson.tone;
         button.style.setProperty("--col", col);
         button.style.setProperty("--start", lesson.start);
@@ -3869,7 +3934,7 @@
 
     function parsePdfScheduleRows(rows, columns) {
       const lessons = [];
-      const pending = { title: [], trainer: [], room: [] };
+      const pending = { title: [], trainer: [], room: [], skipNextMain: false };
 
       rows.forEach((row) => {
         if (row.top <= columns.headerTop + 6) return;
@@ -3880,6 +3945,13 @@
 
         if (isMainRow) {
           const title = stripScheduleTitle([...pending.title, cells.title].filter(Boolean).join(" "));
+          if (pending.skipNextMain || isIgnoredPdfLessonTitle(title)) {
+            pending.title = [];
+            pending.trainer = [];
+            pending.room = [];
+            pending.skipNextMain = false;
+            return;
+          }
           lessons.push({
             title: title || "MAK-Einheit",
             startDate: start.date,
@@ -3892,10 +3964,18 @@
           pending.title = [];
           pending.trainer = [];
           pending.room = [];
+          pending.skipNextMain = false;
           return;
         }
 
         if (/^(BKZ|Wochentag|Zust\u00e4ndiger|Seite|\d+\s+Sch\u00fcler)/i.test(row.text)) return;
+        if (isIgnoredPdfLessonTitle(stripScheduleTitle(cells.title))) {
+          pending.title = [];
+          pending.trainer = [];
+          pending.room = [];
+          pending.skipNextMain = true;
+          return;
+        }
         if (cells.title) pending.title.push(cells.title);
         if (cells.trainer) pending.trainer.push(cells.trainer);
         if (cells.room) pending.room.push(cells.room);
@@ -3948,6 +4028,10 @@
       return title;
     }
 
+    function isIgnoredPdfLessonTitle(value) {
+      return /\bKorrektur\s+Schulaufgabe\b/i.test(String(value || ""));
+    }
+
     function normalizePdfList(value) {
       return String(value || "")
         .replace(/[;,]+/g, " ")
@@ -3959,7 +4043,7 @@
 
     function createPdfTemplateFromParsedSchedule(parsed, weekKey, fileName) {
       const occurrenceCounts = new Map();
-      const lessons = parsed.lessons.map((lesson) => {
+      const lessons = parsed.lessons.filter((lesson) => !isIgnoredPdfLessonTitle(lesson.title)).map((lesson) => {
         const dayIndex = (lesson.startDate.getDay() || 7) - 1;
         const day = days[dayIndex]?.id || "mo";
         const baseId = [
